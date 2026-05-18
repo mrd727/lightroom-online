@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lightroom Online - Photo Editor</title>
+    <title>Lumina Edit Pro – Online Photo Editor</title>
     <style>
         :root {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #1e1e1e;
-            --bg-tertiary: #252525;
-            --bg-panel: #212121;
+            --bg-base: #161616;
+            --bg-panel: #1e1e1e;
+            --bg-surface: #252525;
+            --bg-hover: #2e2e2e;
             --border: #333;
             --border-active: #555;
-            --text-primary: #ddd;
-            --text-secondary: #999;
+            --text: #e0e0e0;
+            --text-secondary: #aaa;
             --text-muted: #777;
-            --accent: #5b9bd5;
-            --accent-hover: #7ab8e8;
-            --accent-dim: #3a7ab5;
-            --slider-track: #444;
-            --slider-fill: #5b9bd5;
-            --danger: #d94f4f;
-            --btn-bg: #333;
-            --btn-hover: #444;
-            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --radius: 6px;
-            --radius-sm: 4px;
-            --transition: 0.15s ease;
+            --accent: #4da6e8;
+            --accent-bright: #6dc0ff;
+            --accent-dim: #2a6da8;
+            --warn: #f0a040;
+            --danger: #e05555;
+            --success: #4caf84;
+            --radius: 8px;
+            --radius-sm: 5px;
+            --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+            --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
         }
 
         * {
@@ -34,11 +35,10 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: var(--font);
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: var(--bg-base);
+            color: var(--text);
             height: 100vh;
             width: 100vw;
             overflow: hidden;
@@ -46,6 +46,18 @@
             flex-direction: column;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
         }
 
         /* TOP BAR */
@@ -53,75 +65,119 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 44px;
-            background: var(--bg-secondary);
+            height: 46px;
+            background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
-            padding: 0 12px;
+            padding: 0 14px;
             flex-shrink: 0;
-            z-index: 10;
+            z-index: 20;
+            gap: 12px;
         }
-        .topbar .logo {
+        .topbar .brand {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
-            letter-spacing: -0.3px;
             color: #fff;
+            letter-spacing: -0.2px;
         }
-        .topbar .logo .dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #5b9bd5, #7ab8e8);
+        .topbar .brand .icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #4da6e8, #6dc0ff);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            color: #fff;
-            font-weight: 700;
+            font-size: 13px;
         }
         .topbar-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .btn {
-            padding: 7px 14px;
+            padding: 7px 13px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
-            background: var(--btn-bg);
-            color: var(--text-primary);
+            background: var(--bg-surface);
+            color: var(--text);
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 500;
             letter-spacing: 0.2px;
             transition: all var(--transition);
             white-space: nowrap;
             font-family: var(--font);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
         }
         .btn:hover {
-            background: var(--btn-hover);
+            background: var(--bg-hover);
             border-color: var(--border-active);
         }
         .btn.accent {
             background: var(--accent-dim);
             border-color: var(--accent);
             color: #fff;
+            font-weight: 600;
         }
         .btn.accent:hover {
             background: var(--accent);
+            box-shadow: 0 0 16px rgba(77, 166, 232, 0.25);
         }
-        .btn.icon-btn {
-            padding: 7px 10px;
-            font-size: 14px;
+        .btn.icon-only {
+            padding: 7px 9px;
+            font-size: 15px;
             min-width: 32px;
-            text-align: center;
+            justify-content: center;
         }
         .btn.active-toggle {
             background: var(--accent-dim);
             border-color: var(--accent);
             color: #fff;
+            box-shadow: 0 0 10px rgba(77, 166, 232, 0.2);
+        }
+        .btn.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .btn.danger:hover {
+            background: #3a1a1a;
+            border-color: #e05555;
+            color: #f08080;
+        }
+        .btn.small {
+            padding: 5px 10px;
+            font-size: 10.5px;
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 99;
+            letter-spacing: 0.3px;
+        }
+        .tooltip:hover::after {
+            opacity: 1;
         }
 
         /* MAIN LAYOUT */
@@ -129,143 +185,150 @@
             display: flex;
             flex: 1;
             overflow: hidden;
-            position: relative;
         }
-
-        /* LEFT SIDEBAR */
         .left-sidebar {
-            width: 48px;
-            background: var(--bg-secondary);
+            width: 50px;
+            background: var(--bg-panel);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 8px;
             flex-shrink: 0;
-            z-index: 5;
+            z-index: 10;
+            gap: 2px;
         }
         .tool-icon {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: var(--radius-sm);
             cursor: pointer;
-            margin-bottom: 4px;
             color: var(--text-secondary);
-            font-size: 16px;
+            font-size: 17px;
             transition: all var(--transition);
             position: relative;
         }
         .tool-icon:hover {
-            background: var(--bg-tertiary);
+            background: var(--bg-surface);
             color: #fff;
         }
         .tool-icon.active {
             background: var(--accent-dim);
             color: #fff;
+            box-shadow: 0 0 8px rgba(77, 166, 232, 0.3);
         }
-        .tool-icon.active::after {
+        .tool-icon.active::before {
             content: '';
             position: absolute;
-            left: -9px;
+            left: -10px;
             top: 50%;
             transform: translateY(-50%);
             width: 3px;
-            height: 20px;
+            height: 22px;
             background: var(--accent);
             border-radius: 0 3px 3px 0;
+        }
+        .sidebar-divider {
+            width: 28px;
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
         }
 
         /* TOOL PANEL */
         .tool-panel {
-            width: 280px;
+            width: 290px;
             background: var(--bg-panel);
             border-right: 1px solid var(--border);
             overflow-y: auto;
             overflow-x: hidden;
             flex-shrink: 0;
-            padding: 12px 16px;
+            padding: 14px 16px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            z-index: 4;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #222;
-        }
-        .tool-panel::-webkit-scrollbar {
-            width: 5px;
-        }
-        .tool-panel::-webkit-scrollbar-track {
-            background: #222;
-        }
-        .tool-panel::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 10px;
+            gap: 16px;
+            z-index: 8;
+            scroll-behavior: smooth;
         }
         .tool-panel.hidden {
             display: none;
         }
-        .panel-section {
+        .panel-section-title {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 4px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 6px;
         }
-        .panel-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            font-weight: 600;
-            margin-bottom: 2px;
+        .panel-section-title .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
         }
         .slider-group {
             display: flex;
             flex-direction: column;
             gap: 2px;
+            margin-bottom: 6px;
         }
         .slider-label {
             display: flex;
             justify-content: space-between;
             font-size: 11px;
             color: var(--text-secondary);
+            letter-spacing: 0.2px;
         }
         .slider-label span.val {
             color: var(--text-muted);
-            min-width: 30px;
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            min-width: 32px;
             text-align: right;
-            font-variant-numeric: tabular-nums;
-            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
         }
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--slider-track);
+            height: 5px;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--accent-dim) 0%, var(--accent-dim) 50%, #3a3a3a 50%, #3a3a3a 100%);
+            background-size: 200% 100%;
+            background-position: right;
             outline: none;
             cursor: pointer;
-            margin: 3px 0;
+            margin: 2px 0;
+            transition: background-position 0.1s;
+        }
+        input[type="range"]:focus {
+            background-position: left;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #fff;
             border: 2px solid var(--accent);
             cursor: pointer;
             transition: all var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
+            transform: scale(1.2);
             border-color: #fff;
+            box-shadow: 0 4px 16px rgba(77, 166, 232, 0.5);
         }
         .divider {
             border: none;
             border-top: 1px solid var(--border);
-            margin: 2px 0;
+            margin: 2px 0 8px;
         }
 
         /* CANVAS AREA */
@@ -274,28 +337,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #111;
+            background: #0d0d0d;
             position: relative;
             overflow: hidden;
+            cursor: default;
         }
-        .canvas-wrapper {
+        .canvas-area.grabbing {
+            cursor: grabbing;
+        }
+        .canvas-viewport {
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 95%;
-            max-height: 90%;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
             border-radius: 2px;
+            transition: transform 0.08s ease-out;
         }
         canvas#mainCanvas {
-            max-width: 100%;
-            max-height: 100%;
             display: block;
             border-radius: 2px;
-            image-rendering: auto;
         }
-        .drop-zone {
+        .drop-overlay {
             position: absolute;
             inset: 0;
             display: flex;
@@ -304,179 +365,309 @@
             justify-content: center;
             color: var(--text-muted);
             pointer-events: none;
-            z-index: 2;
+            z-index: 5;
+            transition: opacity 0.3s;
         }
-        .drop-zone .icon {
-            font-size: 64px;
+        .drop-overlay.hidden {
+            opacity: 0;
+        }
+        .drop-overlay .big-icon {
+            font-size: 72px;
             margin-bottom: 16px;
-            opacity: 0.5;
+            filter: grayscale(0.4);
         }
-        .drop-zone p {
-            font-size: 14px;
-            letter-spacing: 0.5px;
+        .drop-overlay p {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
-        .drop-zone .sub {
+        .drop-overlay .sub {
             font-size: 11px;
             margin-top: 4px;
-            opacity: 0.6;
+            opacity: 0.5;
         }
-        .drop-zone.hidden {
-            display: none;
+
+        /* ZOOM INDICATOR */
+        .zoom-indicator {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            pointer-events: none;
+            z-index: 6;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
         }
 
         /* HISTOGRAM */
-        .histogram-container {
+        .histo-box {
             position: absolute;
             top: 12px;
             right: 16px;
-            background: rgba(30, 30, 30, 0.9);
+            background: rgba(20, 20, 20, 0.92);
             border-radius: var(--radius);
-            padding: 6px 8px;
+            padding: 8px 10px;
             border: 1px solid var(--border);
-            z-index: 3;
+            z-index: 6;
+            backdrop-filter: blur(6px);
         }
         canvas#histogramCanvas {
             display: block;
-            width: 180px;
-            height: 60px;
+            width: 200px;
+            height: 64px;
         }
-        .histogram-label {
+        .histo-label {
             text-align: center;
             font-size: 9px;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
-            margin-top: 2px;
+            letter-spacing: 0.6px;
+            margin-top: 3px;
         }
 
-        /* BOTTOM FILMSTRIP */
+        /* FILMSTRIP */
         .filmstrip {
-            height: 72px;
-            background: var(--bg-secondary);
+            height: 66px;
+            background: var(--bg-panel);
             border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
-            padding: 0 12px;
+            padding: 0 10px;
             gap: 8px;
             flex-shrink: 0;
             overflow-x: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #222;
-        }
-        .filmstrip::-webkit-scrollbar {
-            height: 4px;
-        }
-        .filmstrip::-webkit-scrollbar-track {
-            background: #222;
-        }
-        .filmstrip::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 10px;
         }
         .filmstrip-thumb {
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            height: 48px;
             border-radius: var(--radius-sm);
             overflow: hidden;
             flex-shrink: 0;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: all var(--transition);
             background: #111;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all var(--transition);
         }
         .filmstrip-thumb.active {
             border-color: var(--accent);
-            box-shadow: 0 0 8px rgba(91, 155, 213, 0.4);
+            box-shadow: 0 0 10px rgba(77, 166, 232, 0.4);
         }
         .filmstrip-thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .filmstrip-thumb .placeholder {
-            color: #555;
-            font-size: 20px;
-        }
         .filmstrip-info {
-            font-size: 10px;
+            font-size: 10.5px;
             color: var(--text-muted);
-            margin-left: 4px;
             flex-shrink: 0;
+            white-space: nowrap;
         }
 
-        /* PRESETS GRID */
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+        .modal {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-lg);
+            min-width: 340px;
+            max-width: 90vw;
+            z-index: 101;
+        }
+        .modal h3 {
+            margin-bottom: 14px;
+            font-size: 16px;
+            letter-spacing: -0.2px;
+        }
+        .modal .row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .modal label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+        .modal input,
+        .modal select {
+            padding: 7px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 12px;
+            flex: 1;
+        }
+        .kbd {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 2px 7px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: #ddd;
+            white-space: nowrap;
+        }
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 11px;
+        }
+        .shortcut-row span:first-child {
+            color: var(--text-secondary);
+        }
+
+        /* PRESETS */
         .presets-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
         }
         .preset-card {
-            background: var(--bg-tertiary);
+            background: var(--bg-surface);
             border: 2px solid transparent;
             border-radius: var(--radius);
             padding: 10px;
             cursor: pointer;
             transition: all var(--transition);
             text-align: center;
-            font-size: 11px;
+            font-size: 10.5px;
             color: var(--text-secondary);
         }
         .preset-card:hover {
             border-color: var(--border-active);
-            background: #2a2a2a;
+            background: #2d2d2d;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         .preset-card.active {
             border-color: var(--accent);
-            background: #1e2d3a;
+            background: #1c2d3d;
             color: #fff;
         }
-        .preset-card .preset-swatch {
+        .preset-swatch {
             width: 100%;
-            height: 28px;
-            border-radius: 3px;
+            height: 30px;
+            border-radius: 4px;
             margin-bottom: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
         }
-        .preset-card .preset-name {
-            font-weight: 500;
-            font-size: 11px;
-            letter-spacing: 0.3px;
+        .preset-name {
+            font-weight: 600;
+            font-size: 10.5px;
         }
 
-        /* RESPONSIVE */
+        /* CROP OVERLAY */
+        .crop-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+        .crop-overlay.active {
+            pointer-events: auto;
+        }
+        .crop-box {
+            position: absolute;
+            border: 2px dashed #fff;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+            cursor: move;
+            z-index: 5;
+        }
+        .crop-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 2px;
+            z-index: 6;
+        }
+        .crop-handle.tl {
+            top: -6px;
+            left: -6px;
+            cursor: nw-resize;
+        }
+        .crop-handle.tr {
+            top: -6px;
+            right: -6px;
+            cursor: ne-resize;
+        }
+        .crop-handle.bl {
+            bottom: -6px;
+            left: -6px;
+            cursor: sw-resize;
+        }
+        .crop-handle.br {
+            bottom: -6px;
+            right: -6px;
+            cursor: se-resize;
+        }
+
         @media (max-width: 768px) {
             .tool-panel {
-                width: 240px;
-                padding: 8px 12px;
+                width: 220px;
+                padding: 8px 10px;
                 gap: 8px;
             }
             .left-sidebar {
                 width: 38px;
             }
             .tool-icon {
-                width: 28px;
-                height: 28px;
-                font-size: 13px;
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
             }
-            .histogram-container {
+            .histo-box {
                 top: 4px;
                 right: 4px;
+                padding: 4px 6px;
             }
             canvas#histogramCanvas {
-                width: 120px;
+                width: 130px;
                 height: 40px;
             }
             .filmstrip {
-                height: 56px;
+                height: 50px;
             }
             .filmstrip-thumb {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
+            }
+            .topbar-actions .btn span {
+                display: none;
+            }
+            .topbar-actions .btn.icon-only span {
+                display: inline;
             }
         }
     </style>
@@ -485,414 +676,492 @@
 
     <!-- TOP BAR -->
     <div class="topbar">
-        <div class="logo">
-            <div class="dot">L</div>
-            <span>Lightroom Online</span>
-        </div>
+        <div class="brand"><div class="icon">✦</div>Lumina Edit Pro</div>
         <div class="topbar-actions">
-            <button class="btn icon-btn" id="btnBeforeAfter" title="Before/After (Press \ key)">↔</button>
-            <button class="btn" id="btnReset" title="Reset all adjustments">↺ Reset</button>
-            <button class="btn" id="btnImport" title="Import image">📁 Import</button>
-            <button class="btn accent" id="btnExport" title="Export edited image">⬇ Export</button>
+            <button class="btn tooltip icon-only" data-tip="Undo (Ctrl+Z)" id="btnUndo" disabled>↩</button>
+            <button class="btn tooltip icon-only" data-tip="Redo (Ctrl+Y)" id="btnRedo" disabled>↪</button>
+            <button class="btn tooltip" data-tip="Toggle before/after split view" id="btnSplitView">◫ Split</button>
+            <button class="btn tooltip" data-tip="Hold \\ key for quick before view" id="btnBeforeAfter">↔ Compare</button>
+            <button class="btn tooltip" data-tip="Auto-enhance image" id="btnAuto">⚡ Auto</button>
+            <button class="btn tooltip" data-tip="Reset all adjustments" id="btnReset">↺ Reset</button>
+            <button class="btn tooltip" data-tip="Import image from computer" id="btnImport">📁 Open</button>
+            <button class="btn accent tooltip" data-tip="Export edited photo (Ctrl+S)" id="btnExport">⬇ Export</button>
+            <button class="btn tooltip icon-only" data-tip="Keyboard shortcuts" id="btnShortcuts">⌨</button>
         </div>
     </div>
 
     <!-- MAIN CONTAINER -->
     <div class="main-container">
-        <!-- LEFT SIDEBAR ICONS -->
+        <!-- LEFT SIDEBAR -->
         <div class="left-sidebar" id="leftSidebar">
-            <div class="tool-icon active" data-tool="light" title="Light">☀️</div>
-            <div class="tool-icon" data-tool="color" title="Color">🎨</div>
-            <div class="tool-icon" data-tool="effects" title="Effects">✨</div>
-            <div class="tool-icon" data-tool="presets" title="Presets">💠</div>
+            <div class="tool-icon active" data-tool="light" data-tip="Light">☀</div>
+            <div class="tool-icon" data-tool="color" data-tip="Color">🎨</div>
+            <div class="tool-icon" data-tool="tone" data-tip="Tone Curve">📈</div>
+            <div class="tool-icon" data-tool="effects" data-tip="Effects">✨</div>
+            <div class="tool-icon" data-tool="grading" data-tip="Color Grading">🌈</div>
+            <div class="sidebar-divider"></div>
+            <div class="tool-icon" data-tool="crop" data-tip="Crop & Rotate">✂</div>
+            <div class="tool-icon" data-tool="presets" data-tip="Presets">💠</div>
         </div>
 
-        <!-- TOOL PANELS -->
+        <!-- LIGHT PANEL -->
         <div class="tool-panel" id="panelLight">
-            <div class="panel-section">
-                <div class="panel-section-title">💡 Light</div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Exposure</span><span class="val" id="valExposure">0.00</span></div>
-                    <input type="range" id="sliderExposure" min="-300" max="300" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Contrast</span><span class="val" id="valContrast">0</span></div>
-                    <input type="range" id="sliderContrast" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Highlights</span><span class="val" id="valHighlights">0</span></div>
-                    <input type="range" id="sliderHighlights" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Shadows</span><span class="val" id="valShadows">0</span></div>
-                    <input type="range" id="sliderShadows" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Whites</span><span class="val" id="valWhites">0</span></div>
-                    <input type="range" id="sliderWhites" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Blacks</span><span class="val" id="valBlacks">0</span></div>
-                    <input type="range" id="sliderBlacks" min="-100" max="100" value="0" step="1">
-                </div>
-            </div>
-            <hr class="divider">
-            <div class="panel-section">
-                <div class="panel-section-title">🔆 Brightness</div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Brightness</span><span class="val" id="valBrightness">0</span></div>
-                    <input type="range" id="sliderBrightness" min="-100" max="100" value="0" step="1">
-                </div>
-            </div>
+            <div class="panel-section-title"><span class="dot"></span>Light</div>
+            <div class="slider-group"><div class="slider-label"><span>Exposure</span><span class="val" id="vExposure">0.00</span></div><input type="range" id="sExposure" min="-300" max="300" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Contrast</span><span class="val" id="vContrast">0</span></div><input type="range" id="sContrast" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Highlights</span><span class="val" id="vHighlights">0</span></div><input type="range" id="sHighlights" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Shadows</span><span class="val" id="vShadows">0</span></div><input type="range" id="sShadows" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Whites</span><span class="val" id="vWhites">0</span></div><input type="range" id="sWhites" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Blacks</span><span class="val" id="vBlacks">0</span></div><input type="range" id="sBlacks" min="-100" max="100" value="0"></div>
+            <div class="divider"></div>
+            <div class="slider-group"><div class="slider-label"><span>Brightness</span><span class="val" id="vBrightness">0</span></div><input type="range" id="sBrightness" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Dehaze</span><span class="val" id="vDehaze">0</span></div><input type="range" id="sDehaze" min="-100" max="100" value="0"></div>
         </div>
 
+        <!-- COLOR PANEL -->
         <div class="tool-panel hidden" id="panelColor">
-            <div class="panel-section">
-                <div class="panel-section-title">🎨 Color</div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Temperature</span><span class="val" id="valTemperature">0</span></div>
-                    <input type="range" id="sliderTemperature" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Tint</span><span class="val" id="valTint">0</span></div>
-                    <input type="range" id="sliderTint" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Saturation</span><span class="val" id="valSaturation">0</span></div>
-                    <input type="range" id="sliderSaturation" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Vibrance</span><span class="val" id="valVibrance">0</span></div>
-                    <input type="range" id="sliderVibrance" min="-100" max="100" value="0" step="1">
-                </div>
-            </div>
+            <div class="panel-section-title"><span class="dot"></span>Color</div>
+            <div class="slider-group"><div class="slider-label"><span>Temperature</span><span class="val" id="vTemperature">0</span></div><input type="range" id="sTemperature" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Tint</span><span class="val" id="vTint">0</span></div><input type="range" id="sTint" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Saturation</span><span class="val" id="vSaturation">0</span></div><input type="range" id="sSaturation" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Vibrance</span><span class="val" id="vVibrance">0</span></div><input type="range" id="sVibrance" min="-100" max="100" value="0"></div>
         </div>
 
+        <!-- TONE CURVE PANEL -->
+        <div class="tool-panel hidden" id="panelTone">
+            <div class="panel-section-title"><span class="dot"></span>Tone Curve</div>
+            <canvas id="curveCanvas" width="260" height="180" style="background:#1a1a1a;border-radius:6px;cursor:pointer;width:100%;height:auto;"></canvas>
+            <div class="slider-group"><div class="slider-label"><span>Shadows</span><span class="val" id="vCurveShadows">0</span></div><input type="range" id="sCurveShadows" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Midtones</span><span class="val" id="vCurveMid">0</span></div><input type="range" id="sCurveMid" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Highlights</span><span class="val" id="vCurveHigh">0</span></div><input type="range" id="sCurveHigh" min="-100" max="100" value="0"></div>
+        </div>
+
+        <!-- EFFECTS PANEL -->
         <div class="tool-panel hidden" id="panelEffects">
-            <div class="panel-section">
-                <div class="panel-section-title">✨ Effects</div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Clarity</span><span class="val" id="valClarity">0</span></div>
-                    <input type="range" id="sliderClarity" min="-100" max="100" value="0" step="1">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label"><span>Fade</span><span class="val" id="valFade">0</span></div>
-                    <input type="range" id="sliderFade" min="0" max="100" value="0" step="1">
-                </div>
-            </div>
+            <div class="panel-section-title"><span class="dot"></span>Effects</div>
+            <div class="slider-group"><div class="slider-label"><span>Clarity</span><span class="val" id="vClarity">0</span></div><input type="range" id="sClarity" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Sharpening</span><span class="val" id="vSharpening">0</span></div><input type="range" id="sSharpening" min="0" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Vignette</span><span class="val" id="vVignette">0</span></div><input type="range" id="sVignette" min="-100" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Grain</span><span class="val" id="vGrain">0</span></div><input type="range" id="sGrain" min="0" max="100" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Fade</span><span class="val" id="vFade">0</span></div><input type="range" id="sFade" min="0" max="100" value="0"></div>
         </div>
 
-        <div class="tool-panel hidden" id="panelPresets">
-            <div class="panel-section">
-                <div class="panel-section-title">💠 Presets</div>
-                <div class="presets-grid" id="presetsGrid">
-                    <!-- Generated by JS -->
-                </div>
-                <button class="btn" id="btnClearPreset" style="margin-top:8px;width:100%;">Clear Preset</button>
+        <!-- COLOR GRADING PANEL -->
+        <div class="tool-panel hidden" id="panelGrading">
+            <div class="panel-section-title"><span class="dot"></span>Split Toning</div>
+            <div class="slider-group"><div class="slider-label"><span>Highlight Hue</span><span class="val" id="vSplitHighHue">0°</span></div><input type="range" id="sSplitHighHue" min="0" max="360" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Highlight Sat</span><span class="val" id="vSplitHighSat">0</span></div><input type="range" id="sSplitHighSat" min="0" max="100" value="0"></div>
+            <div class="divider"></div>
+            <div class="slider-group"><div class="slider-label"><span>Shadow Hue</span><span class="val" id="vSplitShadHue">0°</span></div><input type="range" id="sSplitShadHue" min="0" max="360" value="0"></div>
+            <div class="slider-group"><div class="slider-label"><span>Shadow Sat</span><span class="val" id="vSplitShadSat">0</span></div><input type="range" id="sSplitShadSat" min="0" max="100" value="0"></div>
+            <div class="divider"></div>
+            <div class="slider-group"><div class="slider-label"><span>Balance</span><span class="val" id="vSplitBal">0</span></div><input type="range" id="sSplitBal" min="-100" max="100" value="0"></div>
+        </div>
+
+        <!-- CROP PANEL -->
+        <div class="tool-panel hidden" id="panelCrop">
+            <div class="panel-section-title"><span class="dot"></span>Crop & Rotate</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                <button class="btn small crop-ratio" data-ratio="free">Free</button>
+                <button class="btn small crop-ratio" data-ratio="1:1">1:1</button>
+                <button class="btn small crop-ratio" data-ratio="4:3">4:3</button>
+                <button class="btn small crop-ratio" data-ratio="16:9">16:9</button>
+                <button class="btn small crop-ratio" data-ratio="3:2">3:2</button>
+                <button class="btn small crop-ratio" data-ratio="2:3">2:3</button>
             </div>
+            <div class="slider-group"><div class="slider-label"><span>Rotate</span><span class="val" id="vRotate">0°</span></div><input type="range" id="sRotate" min="-180" max="180" value="0"></div>
+            <button class="btn" id="btnFlipH" style="width:100%;margin-top:6px;">↔ Flip Horizontal</button>
+            <button class="btn" id="btnFlipV" style="width:100%;margin-top:4px;">↕ Flip Vertical</button>
+            <button class="btn accent" id="btnApplyCrop" style="width:100%;margin-top:8px;">✓ Apply Crop</button>
+            <button class="btn danger" id="btnCancelCrop" style="width:100%;margin-top:4px;">✕ Cancel</button>
+        </div>
+
+        <!-- PRESETS PANEL -->
+        <div class="tool-panel hidden" id="panelPresets">
+            <div class="panel-section-title"><span class="dot"></span>Presets</div>
+            <div class="presets-grid" id="presetsGrid"></div>
+            <button class="btn" id="btnClearPreset" style="width:100%;margin-top:10px;">Clear Preset</button>
         </div>
 
         <!-- CANVAS AREA -->
         <div class="canvas-area" id="canvasArea">
-            <div class="canvas-wrapper" id="canvasWrapper">
+            <div class="canvas-viewport" id="canvasViewport">
                 <canvas id="mainCanvas"></canvas>
-                <div class="drop-zone" id="dropZone">
-                    <div class="icon">🖼️</div>
-                    <p>Drag & Drop an image here</p>
-                    <p class="sub">or click Import to get started</p>
+                <div class="crop-overlay" id="cropOverlay">
+                    <div class="crop-box" id="cropBox">
+                        <div class="crop-handle tl" data-handle="tl"></div>
+                        <div class="crop-handle tr" data-handle="tr"></div>
+                        <div class="crop-handle bl" data-handle="bl"></div>
+                        <div class="crop-handle br" data-handle="br"></div>
+                    </div>
                 </div>
             </div>
-            <div class="histogram-container" id="histogramContainer" style="display:none;">
-                <canvas id="histogramCanvas" width="180" height="60"></canvas>
-                <div class="histogram-label">Histogram</div>
+            <div class="drop-overlay" id="dropOverlay">
+                <div class="big-icon">🖼️</div>
+                <p>Drop an image here to start editing</p>
+                <p class="sub">or click Open to browse — all processing is local & private</p>
             </div>
+            <div class="histo-box" id="histoBox" style="display:none;">
+                <canvas id="histogramCanvas" width="200" height="64"></canvas>
+                <div class="histo-label">RGB Histogram</div>
+            </div>
+            <div class="zoom-indicator" id="zoomIndicator" style="opacity:0;">100%</div>
         </div>
     </div>
 
-    <!-- BOTTOM FILMSTRIP -->
+    <!-- FILMSTRIP -->
     <div class="filmstrip" id="filmstrip">
-        <div class="filmstrip-thumb active" id="filmstripThumb">
-            <span class="placeholder">🖼️</span>
-        </div>
+        <div class="filmstrip-thumb active" id="filmstripThumb"><span style="color:#555;font-size:22px;">🖼</span></div>
         <span class="filmstrip-info" id="filmstripInfo">No image loaded</span>
     </div>
 
-    <!-- Hidden file input -->
+    <!-- MODALS -->
+    <div class="modal-overlay hidden" id="modalExport">
+        <div class="modal">
+            <h3>⬇ Export Image</h3>
+            <div class="row"><label>Format</label><select id="exportFormat"><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="webp">WebP</option></select></div>
+            <div class="row"><label>Quality</label><input type="range" id="exportQuality" min="10" max="100" value="92"><span id="exportQualityVal" style="font-size:11px;">92%</span></div>
+            <div class="row"><label>Max Size</label><select id="exportSize"><option value="full">Full Resolution</option><option value="2000">2000px</option><option value="1500">1500px</option><option value="1000">1000px</option><option value="800">800px</option></select></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+                <button class="btn accent" id="btnExportConfirm" style="flex:1;">Export</button>
+                <button class="btn" id="btnExportCancel" style="flex:1;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="modalShortcuts">
+        <div class="modal" style="max-width:420px;">
+            <h3>⌨ Keyboard Shortcuts</h3>
+            <div class="shortcut-row"><span>Undo</span><span class="kbd">Ctrl+Z</span></div>
+            <div class="shortcut-row"><span>Redo</span><span class="kbd">Ctrl+Y</span></div>
+            <div class="shortcut-row"><span>Export</span><span class="kbd">Ctrl+S</span></div>
+            <div class="shortcut-row"><span>Reset All</span><span class="kbd">Ctrl+R</span></div>
+            <div class="shortcut-row"><span>Before/After</span><span class="kbd">Hold \</span></div>
+            <div class="shortcut-row"><span>Split View</span><span class="kbd">Shift+S</span></div>
+            <div class="shortcut-row"><span>Auto Enhance</span><span class="kbd">A</span></div>
+            <div class="shortcut-row"><span>Zoom In/Out</span><span class="kbd">Ctrl+Scroll</span></div>
+            <div class="shortcut-row"><span>Pan</span><span class="kbd">Hold Space+Drag</span></div>
+            <div class="shortcut-row"><span>Fit to Screen</span><span class="kbd">Ctrl+0</span></div>
+            <button class="btn" id="btnCloseShortcuts" style="width:100%;margin-top:12px;">Close</button>
+        </div>
+    </div>
+
     <input type="file" id="fileInput" accept="image/*" style="display:none;">
 
     <script>
         (function() {
-            // ==================== DOM ELEMENTS ====================
-            const mainCanvas = document.getElementById('mainCanvas');
-            const ctx = mainCanvas.getContext('2d');
-            const histogramCanvas = document.getElementById('histogramCanvas');
-            const histCtx = histogramCanvas.getContext('2d');
-            const histogramContainer = document.getElementById('histogramContainer');
-            const dropZone = document.getElementById('dropZone');
-            const canvasWrapper = document.getElementById('canvasWrapper');
-            const filmstripThumb = document.getElementById('filmstripThumb');
-            const filmstripInfo = document.getElementById('filmstripInfo');
-            const fileInput = document.getElementById('fileInput');
-            const presetsGrid = document.getElementById('presetsGrid');
+            // ============ DOM REFS ============
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
 
-            // ==================== STATE ====================
-            const state = {
-                image: null, // The loaded HTMLImageElement
-                originalImageData: null, // ImageData of original (at working resolution)
-                workingWidth: 0,
-                workingHeight: 0,
-                displayImageData: null, // Current displayed ImageData
-                adjustments: {
-                    exposure: 0, // -3 to +3 (stored as -300 to 300 in slider, divided by 100)
-                    contrast: 0, // -100 to 100
-                    highlights: 0, // -100 to 100
-                    shadows: 0, // -100 to 100
-                    whites: 0, // -100 to 100
-                    blacks: 0, // -100 to 100
-                    brightness: 0, // -100 to 100
-                    temperature: 0, // -100 to 100
-                    tint: 0, // -100 to 100
-                    saturation: 0, // -100 to 100
-                    vibrance: 0, // -100 to 100
-                    clarity: 0, // -100 to 100
-                    fade: 0, // 0 to 100
-                },
-                selectedTool: 'light',
-                activePreset: null,
-                showBefore: false,
-                renderPending: false,
+            const mainCanvas = $('#mainCanvas');
+            const ctx = mainCanvas.getContext('2d');
+            const histCanvas = $('#histogramCanvas');
+            const histCtx = histCanvas.getContext('2d');
+            const histoBox = $('#histoBox');
+            const dropOverlay = $('#dropOverlay');
+            const canvasViewport = $('#canvasViewport');
+            const canvasArea = $('#canvasArea');
+            const zoomIndicator = $('#zoomIndicator');
+            const filmstripThumb = $('#filmstripThumb');
+            const filmstripInfo = $('#filmstripInfo');
+            const cropOverlay = $('#cropOverlay');
+            const cropBox = $('#cropBox');
+            const curveCanvas = $('#curveCanvas');
+            const curveCtx = curveCanvas.getContext('2d');
+            const presetsGrid = $('#presetsGrid');
+
+            // ============ STATE ============
+            const defaultAdjustments = {
+                exposure: 0,
+                contrast: 0,
+                highlights: 0,
+                shadows: 0,
+                whites: 0,
+                blacks: 0,
+                brightness: 0,
+                dehaze: 0,
+                temperature: 0,
+                tint: 0,
+                saturation: 0,
+                vibrance: 0,
+                clarity: 0,
+                sharpening: 0,
+                vignette: 0,
+                grain: 0,
+                fade: 0,
+                splitHighHue: 0,
+                splitHighSat: 0,
+                splitShadHue: 0,
+                splitShadSat: 0,
+                splitBalance: 0,
+                curveShadows: 0,
+                curveMid: 0,
+                curveHigh: 0,
+                rotate: 0,
+                flipH: false,
+                flipV: false,
+                cropX: 0,
+                cropY: 0,
+                cropW: 0,
+                cropH: 0,
+                cropActive: false,
             };
 
-            // ==================== PRESETS ====================
-            const presets = [{
-                id: 'vintage',
-                name: 'Vintage',
-                icon: '📷',
-                swatch: 'linear-gradient(135deg, #c9a96e, #8b7355)',
-                adjustments: { exposure: 0.1, contrast: -20, saturation: -25, temperature: 15,
-                    highlights: -30, shadows: 25, fade: 15 }
-            }, {
-                id: 'bw',
-                name: 'Black & White',
-                icon: '⬛',
-                swatch: 'linear-gradient(135deg, #555, #111)',
-                adjustments: { saturation: -100, contrast: 25, highlights: -10, shadows: 10 }
-            }, {
-                id: 'warm',
-                name: 'Warm Glow',
-                icon: '☀️',
-                swatch: 'linear-gradient(135deg, #f4a460, #daa520)',
-                adjustments: { temperature: 35, tint: 8, exposure: 0.15, saturation: 10, vibrance: 15 }
-            }, {
-                id: 'cool',
-                name: 'Cool Blue',
-                icon: '❄️',
-                swatch: 'linear-gradient(135deg, #87ceeb, #4682b4)',
-                adjustments: { temperature: -35, tint: -8, saturation: 5, contrast: 10 }
-            }, {
-                id: 'cinematic',
-                name: 'Cinematic',
-                icon: '🎬',
-                swatch: 'linear-gradient(135deg, #2c3e50, #1a1a2e)',
-                adjustments: { contrast: 20, highlights: -25, shadows: 20, blacks: -25, temperature: 8,
-                    saturation: -15, fade: 10 }
-            }, {
-                id: 'crossprocess',
-                name: 'Cross Process',
-                icon: '🌀',
-                swatch: 'linear-gradient(135deg, #e74c3c, #f39c12)',
-                adjustments: { contrast: 35, saturation: 35, temperature: 20, tint: 25, highlights: -15 }
-            }, {
-                id: 'fade',
-                name: 'Faded Film',
-                icon: '🎞️',
-                swatch: 'linear-gradient(135deg, #b8a99a, #8c7b6b)',
-                adjustments: { blacks: 40, contrast: -25, saturation: -20, fade: 35, highlights: -20 }
-            }, {
-                id: 'brightairy',
-                name: 'Bright & Airy',
-                icon: '☁️',
-                swatch: 'linear-gradient(135deg, #fff8f0, #f0e6d8)',
-                adjustments: { exposure: 0.7, contrast: -15, highlights: 25, shadows: 35, saturation: -10,
-                    fade: 5 }
-            }, {
-                id: 'moody',
-                name: 'Moody Dark',
-                icon: '🌙',
-                swatch: 'linear-gradient(135deg, #1a1a2e, #0d0d1a)',
-                adjustments: { exposure: -0.35, contrast: 25, saturation: -35, blacks: -30, shadows: -15,
-                    highlights: -20 }
-            }, {
-                id: 'goldenhour',
-                name: 'Golden Hour',
-                icon: '🌅',
-                swatch: 'linear-gradient(135deg, #f9a825, #ef6c00)',
-                adjustments: { temperature: 40, exposure: 0.25, contrast: -8, highlights: -15, saturation: 15,
-                    vibrance: 20, tint: 10 }
-            }, ];
-            const activePresetAdjustments = null; // Track if a preset is active
+            const state = {
+                image: null,
+                imageName: '',
+                originalImageData: null,
+                workingWidth: 0,
+                workingHeight: 0,
+                displayImageData: null,
+                adjustments: { ...defaultAdjustments },
+                activePreset: null,
+                showBefore: false,
+                splitView: false,
+                renderPending: false,
+                zoom: 1,
+                panX: 0,
+                panY: 0,
+                isPanning: false,
+                panStart: { x: 0, y: 0 },
+                cropMode: false,
+                cropRatio: null,
+                cropRect: { x: 0, y: 0, w: 0, h: 0 },
+                draggingCrop: false,
+                dragHandle: null,
+                undoStack: [],
+                redoStack: [],
+                maxUndo: 60,
+            };
 
-            // ==================== BUILD PRESETS UI ====================
-            function buildPresetsGrid() {
-                presetsGrid.innerHTML = '';
-                presets.forEach(preset => {
-                    const card = document.createElement('div');
-                    card.className = 'preset-card';
-                    card.dataset.presetId = preset.id;
-                    card.innerHTML = `
-                            <div class="preset-swatch" style="background:${preset.swatch};">
-                                <span>${preset.icon}</span>
-                            </div>
-                            <div class="preset-name">${preset.name}</div>
-                        `;
-                    card.addEventListener('click', () => applyPreset(preset));
-                    presetsGrid.appendChild(card);
-                });
+            // ============ UNDO/REDO ============
+            function pushUndo() {
+                const snap = JSON.parse(JSON.stringify(state.adjustments));
+                snap._cropActive = state.adjustments.cropActive;
+                snap._cropX = state.adjustments.cropX;
+                snap._cropY = state.adjustments.cropY;
+                snap._cropW = state.adjustments.cropW;
+                snap._cropH = state.adjustments.cropH;
+                state.undoStack.push(snap);
+                if (state.undoStack.length > state.maxUndo) state.undoStack.shift();
+                state.redoStack = [];
+                updateUndoButtons();
             }
-            buildPresetsGrid();
 
-            function applyPreset(preset) {
-                // Reset all adjustments first
-                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
-                // Apply preset adjustments
-                Object.entries(preset.adjustments).forEach(([key, value]) => {
-                    if (state.adjustments.hasOwnProperty(key)) {
-                        state.adjustments[key] = value;
-                    }
+            function undo() {
+                if (state.undoStack.length === 0) return;
+                const currentSnap = JSON.parse(JSON.stringify(state.adjustments));
+                currentSnap._cropActive = state.adjustments.cropActive;
+                currentSnap._cropX = state.adjustments.cropX;
+                currentSnap._cropY = state.adjustments.cropY;
+                currentSnap._cropW = state.adjustments.cropW;
+                currentSnap._cropH = state.adjustments.cropH;
+                state.redoStack.push(currentSnap);
+                const snap = state.undoStack.pop();
+                Object.keys(state.adjustments).forEach(k => {
+                    if (snap.hasOwnProperty(k)) state.adjustments[k] = snap[k];
                 });
-                state.activePreset = preset.id;
+                if (snap._cropActive !== undefined) state.adjustments.cropActive = snap._cropActive;
+                if (snap._cropX !== undefined) state.adjustments.cropX = snap._cropX;
+                if (snap._cropY !== undefined) state.adjustments.cropY = snap._cropY;
+                if (snap._cropW !== undefined) state.adjustments.cropW = snap._cropW;
+                if (snap._cropH !== undefined) state.adjustments.cropH = snap._cropH;
                 syncSlidersToState();
-                updatePresetCardsHighlight();
-                render();
-            }
-
-            function clearPreset() {
                 state.activePreset = null;
-                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
-                syncSlidersToState();
-                updatePresetCardsHighlight();
+                updatePresetHighlight();
                 render();
+                updateUndoButtons();
             }
 
-            function updatePresetCardsHighlight() {
-                document.querySelectorAll('.preset-card').forEach(card => {
-                    card.classList.toggle('active', card.dataset.presetId === state.activePreset);
+            function redo() {
+                if (state.redoStack.length === 0) return;
+                const currentSnap = JSON.parse(JSON.stringify(state.adjustments));
+                currentSnap._cropActive = state.adjustments.cropActive;
+                currentSnap._cropX = state.adjustments.cropX;
+                currentSnap._cropY = state.adjustments.cropY;
+                currentSnap._cropW = state.adjustments.cropW;
+                currentSnap._cropH = state.adjustments.cropH;
+                state.undoStack.push(currentSnap);
+                const snap = state.redoStack.pop();
+                Object.keys(state.adjustments).forEach(k => {
+                    if (snap.hasOwnProperty(k)) state.adjustments[k] = snap[k];
                 });
+                if (snap._cropActive !== undefined) state.adjustments.cropActive = snap._cropActive;
+                if (snap._cropX !== undefined) state.adjustments.cropX = snap._cropX;
+                if (snap._cropY !== undefined) state.adjustments.cropY = snap._cropY;
+                if (snap._cropW !== undefined) state.adjustments.cropW = snap._cropW;
+                if (snap._cropH !== undefined) state.adjustments.cropH = snap._cropH;
+                syncSlidersToState();
+                state.activePreset = null;
+                updatePresetHighlight();
+                render();
+                updateUndoButtons();
             }
 
-            document.getElementById('btnClearPreset').addEventListener('click', clearPreset);
+            function updateUndoButtons() {
+                $('#btnUndo').disabled = state.undoStack.length === 0;
+                $('#btnRedo').disabled = state.redoStack.length === 0;
+                if (state.undoStack.length === 0) $('#btnUndo').style.opacity = '0.4';
+                else $('#btnUndo').style.opacity = '1';
+                if (state.redoStack.length === 0) $('#btnRedo').style.opacity = '0.4';
+                else $('#btnRedo').style.opacity = '1';
+            }
 
-            // ==================== SLIDER MAPPING ====================
+            // ============ SLIDER MAP ============
             const sliderMap = {
-                sliderExposure: { key: 'exposure', transform: v => v / 100, format: v => (v / 100).toFixed(2),
-                    valId: 'valExposure' },
-                sliderContrast: { key: 'contrast', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valContrast' },
-                sliderHighlights: { key: 'highlights', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valHighlights' },
-                sliderShadows: { key: 'shadows', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valShadows' },
-                sliderWhites: { key: 'whites', transform: v => v, format: v => Math.round(v).toString(),
-                valId: 'valWhites' },
-                sliderBlacks: { key: 'blacks', transform: v => v, format: v => Math.round(v).toString(),
-                valId: 'valBlacks' },
-                sliderBrightness: { key: 'brightness', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valBrightness' },
-                sliderTemperature: { key: 'temperature', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valTemperature' },
-                sliderTint: { key: 'tint', transform: v => v, format: v => Math.round(v).toString(), valId: 'valTint' },
-                sliderSaturation: { key: 'saturation', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valSaturation' },
-                sliderVibrance: { key: 'vibrance', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valVibrance' },
-                sliderClarity: { key: 'clarity', transform: v => v, format: v => Math.round(v).toString(),
-                    valId: 'valClarity' },
-                sliderFade: { key: 'fade', transform: v => v, format: v => Math.round(v).toString(), valId: 'valFade' },
+                sExposure: { k: 'exposure', t: v => v / 100, f: v => (v).toFixed(2), vid: 'vExposure' },
+                sContrast: { k: 'contrast', t: v => v, f: v => Math.round(v) + '', vid: 'vContrast' },
+                sHighlights: { k: 'highlights', t: v => v, f: v => Math.round(v) + '', vid: 'vHighlights' },
+                sShadows: { k: 'shadows', t: v => v, f: v => Math.round(v) + '', vid: 'vShadows' },
+                sWhites: { k: 'whites', t: v => v, f: v => Math.round(v) + '', vid: 'vWhites' },
+                sBlacks: { k: 'blacks', t: v => v, f: v => Math.round(v) + '', vid: 'vBlacks' },
+                sBrightness: { k: 'brightness', t: v => v, f: v => Math.round(v) + '', vid: 'vBrightness' },
+                sDehaze: { k: 'dehaze', t: v => v, f: v => Math.round(v) + '', vid: 'vDehaze' },
+                sTemperature: { k: 'temperature', t: v => v, f: v => Math.round(v) + '', vid: 'vTemperature' },
+                sTint: { k: 'tint', t: v => v, f: v => Math.round(v) + '', vid: 'vTint' },
+                sSaturation: { k: 'saturation', t: v => v, f: v => Math.round(v) + '', vid: 'vSaturation' },
+                sVibrance: { k: 'vibrance', t: v => v, f: v => Math.round(v) + '', vid: 'vVibrance' },
+                sClarity: { k: 'clarity', t: v => v, f: v => Math.round(v) + '', vid: 'vClarity' },
+                sSharpening: { k: 'sharpening', t: v => v, f: v => Math.round(v) + '', vid: 'vSharpening' },
+                sVignette: { k: 'vignette', t: v => v, f: v => Math.round(v) + '', vid: 'vVignette' },
+                sGrain: { k: 'grain', t: v => v, f: v => Math.round(v) + '', vid: 'vGrain' },
+                sFade: { k: 'fade', t: v => v, f: v => Math.round(v) + '', vid: 'vFade' },
+                sSplitHighHue: { k: 'splitHighHue', t: v => v, f: v => Math.round(v) + '°', vid: 'vSplitHighHue' },
+                sSplitHighSat: { k: 'splitHighSat', t: v => v, f: v => Math.round(v) + '', vid: 'vSplitHighSat' },
+                sSplitShadHue: { k: 'splitShadHue', t: v => v, f: v => Math.round(v) + '°', vid: 'vSplitShadHue' },
+                sSplitShadSat: { k: 'splitShadSat', t: v => v, f: v => Math.round(v) + '', vid: 'vSplitShadSat' },
+                sSplitBal: { k: 'splitBalance', t: v => v, f: v => Math.round(v) + '', vid: 'vSplitBal' },
+                sCurveShadows: { k: 'curveShadows', t: v => v, f: v => Math.round(v) + '', vid: 'vCurveShadows' },
+                sCurveMid: { k: 'curveMid', t: v => v, f: v => Math.round(v) + '', vid: 'vCurveMid' },
+                sCurveHigh: { k: 'curveHigh', t: v => v, f: v => Math.round(v) + '', vid: 'vCurveHigh' },
+                sRotate: { k: 'rotate', t: v => v, f: v => Math.round(v) + '°', vid: 'vRotate' },
             };
 
             function syncSlidersToState() {
-                Object.entries(sliderMap).forEach(([sliderId, { key, transform, format, valId }]) => {
-                    const slider = document.getElementById(sliderId);
-                    const valEl = document.getElementById(valId);
-                    if (slider && valEl) {
-                        const rawValue = state.adjustments[key];
-                        // Reverse transform for slider position
-                        const sliderValue = key === 'exposure' ? Math.round(rawValue * 100) : Math.round(
-                            rawValue);
-                        slider.value = sliderValue;
-                        valEl.textContent = format(rawValue);
+                Object.entries(sliderMap).forEach(([sid, { k, t, f, vid }]) => {
+                    const sl = document.getElementById(sid);
+                    const vl = document.getElementById(vid);
+                    if (sl && vl) {
+                        const raw = state.adjustments[k];
+                        sl.value = k === 'exposure' ? Math.round(raw * 100) : Math.round(raw);
+                        vl.textContent = f(raw);
                     }
                 });
-                updatePresetCardsHighlight();
             }
 
-            function syncStateToSliders() {
-                Object.entries(sliderMap).forEach(([sliderId, { key, transform }]) => {
-                    const slider = document.getElementById(sliderId);
-                    if (slider) {
-                        state.adjustments[key] = transform(parseFloat(slider.value));
-                    }
+            function syncStateFromSliders() {
+                Object.entries(sliderMap).forEach(([sid, { k, t }]) => {
+                    const sl = document.getElementById(sid);
+                    if (sl) state.adjustments[k] = t(parseFloat(sl.value));
                 });
-                updateAllSliderLabels();
+                updateAllLabels();
                 state.activePreset = null;
-                updatePresetCardsHighlight();
+                updatePresetHighlight();
             }
 
-            function updateAllSliderLabels() {
-                Object.entries(sliderMap).forEach(([sliderId, { key, format, valId }]) => {
-                    const valEl = document.getElementById(valId);
-                    if (valEl) {
-                        valEl.textContent = format(state.adjustments[key]);
-                    }
+            function updateAllLabels() {
+                Object.entries(sliderMap).forEach(([sid, { k, f, vid }]) => {
+                    const vl = document.getElementById(vid);
+                    if (vl) vl.textContent = f(state.adjustments[k]);
                 });
             }
 
             // Attach slider listeners
-            Object.keys(sliderMap).forEach(sliderId => {
-                const slider = document.getElementById(sliderId);
-                if (slider) {
-                    slider.addEventListener('input', () => {
-                        syncStateToSliders();
+            Object.keys(sliderMap).forEach(sid => {
+                const sl = document.getElementById(sid);
+                if (sl) {
+                    sl.addEventListener('input', () => {
+                        syncStateFromSliders();
+                        pushUndo();
                         scheduleRender();
                     });
                 }
             });
 
-            // ==================== RENDER SCHEDULER ====================
-            function scheduleRender() {
-                if (!state.renderPending) {
-                    state.renderPending = true;
-                    requestAnimationFrame(() => {
-                        state.renderPending = false;
-                        render();
-                    });
-                }
+            // ============ PRESETS ============
+            const presets = [
+                { id: 'vintage', name: 'Vintage', icon: '📷', swatch: '#c9a96e',
+                    adj: { exposure: 0.1, contrast: -20, saturation: -25, temperature: 15, highlights: -30,
+                        shadows: 25, fade: 15 } },
+                { id: 'bw', name: 'B&W Classic', icon: '⬛', swatch: '#666',
+                    adj: { saturation: -100, contrast: 28, highlights: -10, shadows: 12 } },
+                { id: 'warm', name: 'Warm Glow', icon: '☀️', swatch: '#f4a460',
+                    adj: { temperature: 35, tint: 8, exposure: 0.15, saturation: 10, vibrance: 15 } },
+                { id: 'cool', name: 'Cool Blue', icon: '❄️', swatch: '#87ceeb',
+                    adj: { temperature: -35, tint: -6, saturation: 5, contrast: 10 } },
+                { id: 'cinematic', name: 'Cinematic', icon: '🎬', swatch: '#2c3e50',
+                    adj: { contrast: 22, highlights: -25, shadows: 20, blacks: -25, temperature: 8, saturation: -15,
+                        fade: 10 } },
+                { id: 'cross', name: 'Cross Process', icon: '🌀', swatch: '#e74c3c',
+                    adj: { contrast: 35, saturation: 35, temperature: 20, tint: 25, highlights: -15 } },
+                { id: 'faded', name: 'Faded Film', icon: '🎞️', swatch: '#b8a99a',
+                    adj: { blacks: 40, contrast: -25, saturation: -20, fade: 35, highlights: -20 } },
+                { id: 'airy', name: 'Bright & Airy', icon: '☁️', swatch: '#fff8f0',
+                    adj: { exposure: 0.7, contrast: -15, highlights: 25, shadows: 35, saturation: -10, fade: 5 } },
+                { id: 'moody', name: 'Moody Dark', icon: '🌙', swatch: '#1a1a2e',
+                    adj: { exposure: -0.35, contrast: 25, saturation: -35, blacks: -30, shadows: -15,
+                    highlights: -20 } },
+                { id: 'golden', name: 'Golden Hour', icon: '🌅', swatch: '#f9a825',
+                    adj: { temperature: 40, exposure: 0.25, contrast: -8, highlights: -15, saturation: 15,
+                        vibrance: 20, tint: 10 } },
+            ];
+
+            function buildPresets() {
+                presetsGrid.innerHTML = '';
+                presets.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'preset-card';
+                    card.dataset.pid = p.id;
+                    card.innerHTML =
+                        `<div class="preset-swatch" style="background:${p.swatch};"><span>${p.icon}</span></div><div class="preset-name">${p.name}</div>`;
+                    card.addEventListener('click', () => applyPreset(p));
+                    presetsGrid.appendChild(card);
+                });
+            }
+            buildPresets();
+
+            function applyPreset(p) {
+                pushUndo();
+                Object.keys(state.adjustments).forEach(k => { state.adjustments[k] = defaultAdjustments[k]; });
+                Object.entries(p.adj).forEach(([k, v]) => { if (state.adjustments.hasOwnProperty(k)) state.adjustments[
+                        k] = v; });
+                state.activePreset = p.id;
+                syncSlidersToState();
+                updatePresetHighlight();
+                render();
             }
 
-            // ==================== IMAGE PROCESSING ====================
-            function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+            function updatePresetHighlight() {
+                $$('.preset-card').forEach(c => c.classList.toggle('active', c.dataset.pid === state.activePreset));
+            }
+            $('#btnClearPreset').addEventListener('click', () => {
+                pushUndo();
+                Object.keys(state.adjustments).forEach(k => { state.adjustments[k] = defaultAdjustments[k]; });
+                state.activePreset = null;
+                syncSlidersToState();
+                updatePresetHighlight();
+                render();
+            });
+
+            // ============ CLAMP & COLOR UTILS ============
+            const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
             function rgbToHsl(r, g, b) {
                 r /= 255;
                 g /= 255;
                 b /= 255;
-                const max = Math.max(r, g, b),
-                    min = Math.min(r, g, b);
-                let h, s, l = (max + min) / 2;
-                if (max === min) { h = s = 0; } else {
-                    const d = max - min;
-                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                    switch (max) {
-                        case r:
-                            h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-                            break;
-                        case g:
-                            h = ((b - r) / d + 2) / 6;
-                            break;
-                        case b:
-                            h = ((r - g) / d + 4) / 6;
-                            break;
-                    }
+                const mx = Math.max(r, g, b),
+                    mn = Math.min(r, g, b);
+                let h = 0,
+                    s = 0,
+                    l = (mx + mn) / 2;
+                if (mx !== mn) {
+                    const d = mx - mn;
+                    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+                    if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+                    else if (mx === g) h = ((b - r) / d + 2) / 6;
+                    else h = ((r - g) / d + 4) / 6;
                 }
                 return { h, s, l };
             }
@@ -917,105 +1186,80 @@
                 return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
             }
 
-            function getLuminance(r, g, b) {
-                return 0.299 * r + 0.587 * g + 0.114 * b;
-            }
+            function getLum(r, g, b) { return 0.299 * r + 0.587 * g + 0.114 * b; }
 
-            function applyAdjustments(sourceData, adjustments) {
-                const data = new Uint8ClampedArray(sourceData.data);
+            // ============ IMAGE PROCESSING ============
+            function applyAdjustments(srcData, adj, w, h) {
+                const data = new Uint8ClampedArray(srcData.data);
                 const len = data.length;
-                const adj = adjustments;
-
-                // Pre-compute exposure multiplier
-                const exposureMult = Math.pow(2, adj.exposure);
+                const expMul = Math.pow(2, adj.exposure);
 
                 for (let i = 0; i < len; i += 4) {
-                    let r = data[i];
-                    let g = data[i + 1];
-                    let b = data[i + 2];
-
-                    // --- Exposure ---
-                    r = clamp(r * exposureMult, 0, 255);
-                    g = clamp(g * exposureMult, 0, 255);
-                    b = clamp(b * exposureMult, 0, 255);
-
-                    // --- Brightness ---
-                    const brightOffset = adj.brightness * 2.55;
-                    r = clamp(r + brightOffset, 0, 255);
-                    g = clamp(g + brightOffset, 0, 255);
-                    b = clamp(b + brightOffset, 0, 255);
-
-                    // --- Contrast ---
+                    let r = data[i],
+                        g = data[i + 1],
+                        b = data[i + 2];
+                    r = clamp(r * expMul, 0, 255);
+                    g = clamp(g * expMul, 0, 255);
+                    b = clamp(b * expMul, 0, 255);
+                    const bo = adj.brightness * 2.55;
+                    r = clamp(r + bo, 0, 255);
+                    g = clamp(g + bo, 0, 255);
+                    b = clamp(b + bo, 0, 255);
                     if (adj.contrast !== 0) {
-                        const contrastFactor = (259 * (adj.contrast + 255)) / (255 * (259 - adj.contrast));
-                        const contrastMid = 128;
-                        r = clamp(contrastFactor * (r - contrastMid) + contrastMid, 0, 255);
-                        g = clamp(contrastFactor * (g - contrastMid) + contrastMid, 0, 255);
-                        b = clamp(contrastFactor * (b - contrastMid) + contrastMid, 0, 255);
+                        const cf = (259 * (adj.contrast + 255)) / (255 * (259 - adj.contrast));
+                        r = clamp(cf * (r - 128) + 128, 0, 255);
+                        g = clamp(cf * (g - 128) + 128, 0, 255);
+                        b = clamp(cf * (b - 128) + 128, 0, 255);
                     }
-
-                    // --- Highlights & Shadows ---
-                    const lum = getLuminance(r, g, b);
+                    const lum = getLum(r, g, b);
                     if (adj.highlights !== 0 && lum > 128) {
-                        const factor = 1 + (adj.highlights / 100) * ((lum - 128) / 127);
-                        r = clamp(r * factor, 0, 255);
-                        g = clamp(g * factor, 0, 255);
-                        b = clamp(b * factor, 0, 255);
+                        const f = 1 + (adj.highlights / 100) * ((lum - 128) / 127);
+                        r = clamp(r * f, 0, 255);
+                        g = clamp(g * f, 0, 255);
+                        b = clamp(b * f, 0, 255);
                     }
                     if (adj.shadows !== 0 && lum < 128) {
-                        const factor = 1 + (adj.shadows / 100) * ((128 - lum) / 128);
-                        r = clamp(r * factor, 0, 255);
-                        g = clamp(g * factor, 0, 255);
-                        b = clamp(b * factor, 0, 255);
+                        const f = 1 + (adj.shadows / 100) * ((128 - lum) / 128);
+                        r = clamp(r * f, 0, 255);
+                        g = clamp(g * f, 0, 255);
+                        b = clamp(b * f, 0, 255);
                     }
-
-                    // --- Whites & Blacks ---
                     if (adj.whites !== 0 && lum > 192) {
-                        const wFactor = 1 + adj.whites / 100;
-                        r = clamp(r * wFactor, 0, 255);
-                        g = clamp(g * wFactor, 0, 255);
-                        b = clamp(b * wFactor, 0, 255);
+                        const f = 1 + adj.whites / 100;
+                        r = clamp(r * f, 0, 255);
+                        g = clamp(g * f, 0, 255);
+                        b = clamp(b * f, 0, 255);
                     }
                     if (adj.blacks !== 0 && lum < 64) {
-                        const bFactor = 1 + adj.blacks / 100;
-                        r = clamp(r * bFactor, 0, 255);
-                        g = clamp(g * bFactor, 0, 255);
-                        b = clamp(b * bFactor, 0, 255);
+                        const f = 1 + adj.blacks / 100;
+                        r = clamp(r * f, 0, 255);
+                        g = clamp(g * f, 0, 255);
+                        b = clamp(b * f, 0, 255);
                     }
-
-                    // --- Temperature (warm/cool) ---
+                    if (adj.dehaze !== 0) {
+                        const dh = adj.dehaze / 100;
+                        const dhLum = getLum(r, g, b);
+                        const dhAmt = dh * 0.6;
+                        r = clamp(r + (r - dhLum) * dhAmt, 0, 255);
+                        g = clamp(g + (g - dhLum) * dhAmt, 0, 255);
+                        b = clamp(b + (b - dhLum) * dhAmt, 0, 255);
+                    }
                     if (adj.temperature !== 0) {
-                        const tempFactor = adj.temperature / 100;
-                        if (tempFactor > 0) {
-                            // Warmer: more red, less blue
-                            r = clamp(r * (1 + tempFactor * 0.4), 0, 255);
-                            b = clamp(b * (1 - tempFactor * 0.3), 0, 255);
-                        } else {
-                            // Cooler: more blue, less red
-                            const cool = Math.abs(tempFactor);
-                            b = clamp(b * (1 + cool * 0.4), 0, 255);
-                            r = clamp(r * (1 - cool * 0.3), 0, 255);
-                        }
+                        const tf = adj.temperature / 100;
+                        if (tf > 0) { r = clamp(r * (1 + tf * 0.4), 0, 255);
+                            b = clamp(b * (1 - tf * 0.3), 0, 255); } else { const c = Math.abs(tf);
+                            b = clamp(b * (1 + c * 0.4), 0, 255);
+                            r = clamp(r * (1 - c * 0.3), 0, 255); }
                     }
-
-                    // --- Tint (green/magenta) ---
                     if (adj.tint !== 0) {
-                        const tintFactor = adj.tint / 100;
-                        if (tintFactor > 0) {
-                            // Magenta: boost R and B
-                            r = clamp(r * (1 + tintFactor * 0.25), 0, 255);
-                            b = clamp(b * (1 + tintFactor * 0.25), 0, 255);
-                            g = clamp(g * (1 - tintFactor * 0.2), 0, 255);
-                        } else {
-                            // Green: boost G
-                            const greenF = Math.abs(tintFactor);
-                            g = clamp(g * (1 + greenF * 0.3), 0, 255);
-                            r = clamp(r * (1 - greenF * 0.15), 0, 255);
-                            b = clamp(b * (1 - greenF * 0.15), 0, 255);
-                        }
+                        const tf = adj.tint / 100;
+                        if (tf > 0) { r = clamp(r * (1 + tf * 0.25), 0, 255);
+                            b = clamp(b * (1 + tf * 0.25), 0, 255);
+                            g = clamp(g * (1 - tf * 0.2), 0, 255); } else { const gf = Math.abs(tf);
+                            g = clamp(g * (1 + gf * 0.3), 0, 255);
+                            r = clamp(r * (1 - gf * 0.15), 0, 255);
+                            b = clamp(b * (1 - gf * 0.15), 0, 255); }
                     }
-
-                    // --- Saturation ---
                     if (adj.saturation !== 0) {
                         const hsl = rgbToHsl(r, g, b);
                         hsl.s = clamp(hsl.s * (1 + adj.saturation / 100), 0, 1);
@@ -1024,159 +1268,355 @@
                         g = rgb.g;
                         b = rgb.b;
                     }
-
-                    // --- Vibrance ---
                     if (adj.vibrance !== 0) {
                         const hsl = rgbToHsl(r, g, b);
-                        const vibBoost = adj.vibrance / 100;
-                        // Vibrance boosts less-saturated colors more
-                        const weight = 1 - hsl.s; // Higher weight for low saturation
-                        hsl.s = clamp(hsl.s + vibBoost * weight * 0.6, 0, 1);
-                        if (adj.vibrance < 0) {
-                            hsl.s = clamp(hsl.s * (1 + vibBoost * 0.5), 0, 1);
-                        }
+                        const vb = adj.vibrance / 100;
+                        const w = 1 - hsl.s;
+                        hsl.s = clamp(hsl.s + vb * w * 0.6, 0, 1);
+                        if (vb < 0) hsl.s = clamp(hsl.s * (1 + vb * 0.5), 0, 1);
                         const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
                         r = rgb.r;
                         g = rgb.g;
                         b = rgb.b;
                     }
-
-                    // --- Fade (lift blacks, reduce contrast at low end) ---
-                    if (adj.fade > 0) {
-                        const fadeAmount = adj.fade / 100;
-                        // Blend toward a gray midtone for the darkest parts
-                        const fadeLum = getLuminance(r, g, b);
-                        const fadeWeight = Math.max(0, 1 - fadeLum / 128) * fadeAmount;
-                        const fadeTarget = 80;
-                        r = r + (fadeTarget - r) * fadeWeight;
-                        g = g + (fadeTarget - g) * fadeWeight;
-                        b = b + (fadeTarget - b) * fadeWeight;
-                        r = clamp(r, 0, 255);
-                        g = clamp(g, 0, 255);
-                        b = clamp(b, 0, 255);
+                    // Curve
+                    if (adj.curveShadows !== 0 || adj.curveMid !== 0 || adj.curveHigh !== 0) {
+                        const clum = clamp(getLum(r, g, b) / 255, 0, 1);
+                        let curveAdj = 0;
+                        if (clum < 0.33) curveAdj = adj.curveShadows / 100 * (1 - clum / 0.33);
+                        else if (clum < 0.66) curveAdj = adj.curveMid / 100 * (1 - Math.abs(clum - 0.5) / 0.17);
+                        else curveAdj = adj.curveHigh / 100 * ((clum - 0.66) / 0.34);
+                        const cf = 1 + curveAdj * 0.5;
+                        r = clamp(r * cf, 0, 255);
+                        g = clamp(g * cf, 0, 255);
+                        b = clamp(b * cf, 0, 255);
                     }
-
+                    // Split toning
+                    if (adj.splitHighSat > 0 || adj.splitShadSat > 0) {
+                        const slum = clamp(getLum(r, g, b) / 255, 0, 1);
+                        const bal = (adj.splitBalance + 100) / 200;
+                        const highW = clamp(slum - bal, 0, 1) * 2;
+                        const shadW = clamp(bal - slum, 0, 1) * 2;
+                        if (adj.splitHighSat > 0 && highW > 0) {
+                            const hh = adj.splitHighHue / 360;
+                            const hs = adj.splitHighSat / 100 * highW * 0.7;
+                            const hsl = rgbToHsl(r, g, b);
+                            hsl.h = hsl.h * (1 - hs) + hh * hs;
+                            hsl.s = clamp(hsl.s + hs * 0.4, 0, 1);
+                            const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                            r = r * (1 - hs) + rgb.r * hs;
+                            g = g * (1 - hs) + rgb.g * hs;
+                            b = b * (1 - hs) + rgb.b * hs;
+                        }
+                        if (adj.splitShadSat > 0 && shadW > 0) {
+                            const sh = adj.splitShadHue / 360;
+                            const ss = adj.splitShadSat / 100 * shadW * 0.7;
+                            const hsl = rgbToHsl(r, g, b);
+                            hsl.h = hsl.h * (1 - ss) + sh * ss;
+                            hsl.s = clamp(hsl.s + ss * 0.4, 0, 1);
+                            const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                            r = r * (1 - ss) + rgb.r * ss;
+                            g = g * (1 - ss) + rgb.g * ss;
+                            b = b * (1 - ss) + rgb.b * ss;
+                        }
+                    }
+                    if (adj.fade > 0) {
+                        const fa = adj.fade / 100;
+                        const fl = getLum(r, g, b);
+                        const fw = Math.max(0, 1 - fl / 128) * fa;
+                        r = r + (80 - r) * fw;
+                        g = g + (80 - g) * fw;
+                        b = b + (80 - b) * fw;
+                    }
                     data[i] = clamp(Math.round(r), 0, 255);
                     data[i + 1] = clamp(Math.round(g), 0, 255);
                     data[i + 2] = clamp(Math.round(b), 0, 255);
                 }
 
-                // --- Clarity (simplified unsharp mask / local contrast) ---
-                if (adj.clarity !== 0 && state.workingWidth > 0) {
-                    const clarityAmount = adj.clarity / 100;
-                    const w = state.workingWidth;
-                    const h = state.workingHeight;
-                    const tempData = new Uint8ClampedArray(data);
-                    const radius = 8;
+                // Clarity
+                if (adj.clarity !== 0 && w > 0) {
+                    const ca = adj.clarity / 100;
+                    const temp = new Uint8ClampedArray(data);
+                    const rad = 8;
                     for (let y = 0; y < h; y++) {
                         for (let x = 0; x < w; x++) {
                             const idx = (y * w + x) * 4;
-                            let sumR = 0,
-                                sumG = 0,
-                                sumB = 0,
-                                count = 0;
-                            for (let dy = -radius; dy <= radius; dy += radius) {
-                                for (let dx = -radius; dx <= radius; dx += radius) {
+                            let sr = 0,
+                                sg = 0,
+                                sb = 0,
+                                cnt = 0;
+                            for (let dy = -rad; dy <= rad; dy += rad) {
+                                for (let dx = -rad; dx <= rad; dx += rad) {
                                     const nx = clamp(x + dx, 0, w - 1);
                                     const ny = clamp(y + dy, 0, h - 1);
-                                    const nIdx = (ny * w + nx) * 4;
-                                    sumR += tempData[nIdx];
-                                    sumG += tempData[nIdx + 1];
-                                    sumB += tempData[nIdx + 2];
-                                    count++;
+                                    const ni = (ny * w + nx) * 4;
+                                    sr += temp[ni];
+                                    sg += temp[ni + 1];
+                                    sb += temp[ni + 2];
+                                    cnt++;
                                 }
                             }
-                            const avgR = sumR / count;
-                            const avgG = sumG / count;
-                            const avgB = sumB / count;
-                            const detailR = tempData[idx] - avgR;
-                            const detailG = tempData[idx + 1] - avgG;
-                            const detailB = tempData[idx + 2] - avgB;
-                            data[idx] = clamp(tempData[idx] + detailR * clarityAmount * 0.8, 0, 255);
-                            data[idx + 1] = clamp(tempData[idx + 1] + detailG * clarityAmount * 0.8, 0, 255);
-                            data[idx + 2] = clamp(tempData[idx + 2] + detailB * clarityAmount * 0.8, 0, 255);
+                            const dr = temp[idx] - sr / cnt;
+                            const dg = temp[idx + 1] - sg / cnt;
+                            const db = temp[idx + 2] - sb / cnt;
+                            data[idx] = clamp(temp[idx] + dr * ca * 0.8, 0, 255);
+                            data[idx + 1] = clamp(temp[idx + 1] + dg * ca * 0.8, 0, 255);
+                            data[idx + 2] = clamp(temp[idx + 2] + db * ca * 0.8, 0, 255);
                         }
                     }
                 }
+                // Sharpening
+                if (adj.sharpening > 0 && w > 0) {
+                    const sa = adj.sharpening / 100;
+                    const temp = new Uint8ClampedArray(data);
+                    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+                    for (let y = 1; y < h - 1; y++) {
+                        for (let x = 1; x < w - 1; x++) {
+                            const idx = (y * w + x) * 4;
+                            for (let c = 0; c < 3; c++) {
+                                let val = 0;
+                                for (let ky = -1; ky <= 1; ky++)
+                                    for (let kx = -1; kx <= 1; kx++) {
+                                        val += temp[((y + ky) * w + (x + kx)) * 4 + c] * kernel[(ky + 1) * 3 + (kx +
+                                            1)];
+                                    }
+                                data[idx + c] = clamp(temp[idx + c] + (val - temp[idx + c]) * sa, 0, 255);
+                            }
+                        }
+                    }
+                }
+                // Vignette
+                if (adj.vignette !== 0 && w > 0) {
+                    const va = adj.vignette / 100;
+                    const cx = w / 2,
+                        cy = h / 2;
+                    const maxR = Math.sqrt(cx * cx + cy * cy);
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const idx = (y * w + x) * 4;
+                            const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2) / maxR;
+                            const darken = va * Math.pow(dist, 1.8);
+                            data[idx] = clamp(data[idx] * (1 - darken), 0, 255);
+                            data[idx + 1] = clamp(data[idx + 1] * (1 - darken), 0, 255);
+                            data[idx + 2] = clamp(data[idx + 2] * (1 - darken), 0, 255);
+                        }
+                    }
+                }
+                // Grain
+                if (adj.grain > 0 && w > 0) {
+                    const ga = adj.grain / 100 * 40;
+                    const grainSeed = 42;
+                    for (let i = 0; i < len; i += 4) {
+                        const noise = (Math.sin(i * 12.9898 + grainSeed) * 43758.5453) % 1;
+                        const gn = (noise - 0.5) * ga;
+                        data[i] = clamp(data[i] + gn, 0, 255);
+                        data[i + 1] = clamp(data[i + 1] + gn, 0, 255);
+                        data[i + 2] = clamp(data[i + 2] + gn, 0, 255);
+                    }
+                }
 
-                return new ImageData(data, state.workingWidth, state.workingHeight);
+                return new ImageData(data, w, h);
             }
 
-            // ==================== RENDER ====================
+            // ============ RENDER ============
             function render() {
                 if (!state.originalImageData) return;
+                let srcData = state.originalImageData;
+                let w = state.workingWidth;
+                let h = state.workingHeight;
+                let cropApplied = false;
 
-                const processedData = state.showBefore ?
-                    new ImageData(
-                        new Uint8ClampedArray(state.originalImageData.data),
-                        state.workingWidth,
-                        state.workingHeight
-                    ) :
-                    applyAdjustments(state.originalImageData, state.adjustments);
+                if (state.adjustments.cropActive && state.adjustments.cropW > 0) {
+                    const cx = state.adjustments.cropX;
+                    const cy = state.adjustments.cropY;
+                    const cw = state.adjustments.cropW;
+                    const ch = state.adjustments.cropH;
+                    const offCanvas = document.createElement('canvas');
+                    offCanvas.width = cw;
+                    offCanvas.height = ch;
+                    const offCtx = offCanvas.getContext('2d');
+                    offCtx.putImageData(srcData, -cx, -cy);
+                    srcData = offCtx.getImageData(0, 0, cw, ch);
+                    w = cw;
+                    h = ch;
+                    cropApplied = true;
+                }
 
-                state.displayImageData = processedData;
-                mainCanvas.width = state.workingWidth;
-                mainCanvas.height = state.workingHeight;
-                ctx.putImageData(processedData, 0, 0);
-                updateHistogram(processedData);
+                let processed;
+                if (state.showBefore && !state.splitView) {
+                    processed = new ImageData(new Uint8ClampedArray(srcData.data), w, h);
+                } else if (state.splitView && srcData === state.originalImageData && !cropApplied) {
+                    const halfW = Math.floor(w / 2);
+                    const leftData = new Uint8ClampedArray(srcData.data);
+                    const rightProcessed = applyAdjustments(srcData, state.adjustments, w, h);
+                    const combined = new Uint8ClampedArray(srcData.data.length);
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const idx = (y * w + x) * 4;
+                            if (x < halfW) {
+                                combined[idx] = leftData[idx];
+                                combined[idx + 1] = leftData[idx + 1];
+                                combined[idx + 2] = leftData[idx + 2];
+                                combined[idx + 3] = leftData[idx + 3];
+                            } else {
+                                combined[idx] = rightProcessed.data[idx];
+                                combined[idx + 1] = rightProcessed.data[idx + 1];
+                                combined[idx + 2] = rightProcessed.data[idx + 2];
+                                combined[idx + 3] = rightProcessed.data[idx + 3];
+                            }
+                        }
+                    }
+                    processed = new ImageData(combined, w, h);
+                } else {
+                    processed = applyAdjustments(srcData, state.adjustments, w, h);
+                }
+
+                // Rotate & flip
+                if (state.adjustments.rotate !== 0 || state.adjustments.flipH || state.adjustments.flipV) {
+                    const offCanvas = document.createElement('canvas');
+                    const rotRad = state.adjustments.rotate * Math.PI / 180;
+                    const cos = Math.abs(Math.cos(rotRad));
+                    const sin = Math.abs(Math.sin(rotRad));
+                    const nw = Math.round(w * cos + h * sin);
+                    const nh = Math.round(w * sin + h * cos);
+                    offCanvas.width = nw;
+                    offCanvas.height = nh;
+                    const offCtx = offCanvas.getContext('2d');
+                    offCtx.translate(nw / 2, nh / 2);
+                    offCtx.rotate(rotRad);
+                    if (state.adjustments.flipH) offCtx.scale(-1, 1);
+                    if (state.adjustments.flipV) offCtx.scale(1, -1);
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = w;
+                    tempCanvas.height = h;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(processed, 0, 0);
+                    offCtx.drawImage(tempCanvas, -w / 2, -h / 2);
+                    processed = offCtx.getImageData(0, 0, nw, nh);
+                    w = nw;
+                    h = nh;
+                }
+
+                state.displayImageData = processed;
+                const displayW = cropApplied ? state.adjustments.cropW : (state.adjustments.rotate !== 0 || state
+                    .adjustments.flipH || state.adjustments.flipV ? w : state.workingWidth);
+                const displayH = cropApplied ? state.adjustments.cropH : (state.adjustments.rotate !== 0 || state
+                    .adjustments.flipH || state.adjustments.flipV ? h : state.workingHeight);
+
+                mainCanvas.width = w;
+                mainCanvas.height = h;
+                ctx.putImageData(processed, 0, 0);
+                updateHistogram(processed);
                 updateFilmstripThumb();
+                updateCurveCanvas();
+                updateViewportTransform();
+            }
+
+            function updateViewportTransform() {
+                const scale = state.zoom;
+                const tx = state.panX;
+                const ty = state.panY;
+                canvasViewport.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+                canvasViewport.style.transformOrigin = 'center center';
             }
 
             function updateHistogram(imageData) {
                 const data = imageData.data;
-                const bins = new Array(256).fill(0);
+                const binsR = new Array(256).fill(0);
+                const binsG = new Array(256).fill(0);
+                const binsB = new Array(256).fill(0);
                 const len = data.length;
                 for (let i = 0; i < len; i += 4) {
-                    const lum = Math.round(getLuminance(data[i], data[i + 1], data[i + 2]));
-                    bins[clamp(lum, 0, 255)]++;
+                    binsR[clamp(data[i], 0, 255)]++;
+                    binsG[clamp(data[i + 1], 0, 255)]++;
+                    binsB[clamp(data[i + 2], 0, 255)]++;
                 }
-                const maxCount = Math.max(1, ...bins);
-                const w = histogramCanvas.width;
-                const h = histogramCanvas.height;
-                histCtx.clearRect(0, 0, w, h);
-                // Background
-                histCtx.fillStyle = 'rgba(20,20,20,0.6)';
-                histCtx.fillRect(0, 0, w, h);
-                // Draw bars
-                const barWidth = w / 256;
+                const maxC = Math.max(1, Math.max(...binsR, ...binsG, ...binsB));
+                const cw = histCanvas.width;
+                const ch = histCanvas.height;
+                histCtx.clearRect(0, 0, cw, ch);
+                histCtx.fillStyle = 'rgba(18,18,18,0.7)';
+                histCtx.fillRect(0, 0, cw, ch);
+                const barW = cw / 256;
                 for (let i = 0; i < 256; i++) {
-                    const barHeight = (bins[i] / maxCount) * h;
-                    const x = i * barWidth;
-                    const y = h - barHeight;
-                    // Color gradient based on position
-                    const alpha = 0.55 + (bins[i] / maxCount) * 0.45;
-                    if (i < 85) {
-                        histCtx.fillStyle = `rgba(80,80,80,${alpha})`;
-                    } else if (i < 170) {
-                        histCtx.fillStyle = `rgba(160,160,160,${alpha})`;
-                    } else {
-                        histCtx.fillStyle = `rgba(220,220,220,${alpha})`;
-                    }
-                    histCtx.fillRect(x, y, Math.max(1, barWidth - 0.5), barHeight);
+                    const x = i * barW;
+                    const hr = (binsR[i] / maxC) * ch;
+                    const hg = (binsG[i] / maxC) * ch;
+                    const hb = (binsB[i] / maxC) * ch;
+                    histCtx.fillStyle = `rgba(240,80,80,0.7)`;
+                    histCtx.fillRect(x, ch - hr, Math.max(1, barW - 0.3), hr);
+                    histCtx.fillStyle = `rgba(80,220,80,0.55)`;
+                    histCtx.fillRect(x, ch - hg, Math.max(1, barW - 0.3), hg);
+                    histCtx.fillStyle = `rgba(80,140,240,0.6)`;
+                    histCtx.fillRect(x, ch - hb, Math.max(1, barW - 0.3), hb);
                 }
-                // Subtle grid line at 50%
-                histCtx.strokeStyle = 'rgba(255,255,255,0.08)';
-                histCtx.beginPath();
-                histCtx.moveTo(0, h / 2);
-                histCtx.lineTo(w, h / 2);
-                histCtx.stroke();
             }
 
             function updateFilmstripThumb() {
-                if (state.displayImageData && state.workingWidth > 0) {
-                    const thumbCanvas = document.createElement('canvas');
-                    thumbCanvas.width = state.workingWidth;
-                    thumbCanvas.height = state.workingHeight;
-                    const thumbCtx = thumbCanvas.getContext('2d');
-                    thumbCtx.putImageData(state.displayImageData, 0, 0);
-                    const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.7);
-                    filmstripThumb.innerHTML = `<img src="${dataUrl}" alt="thumbnail">`;
+                if (state.displayImageData && state.displayImageData.width > 0) {
+                    const tc = document.createElement('canvas');
+                    tc.width = state.displayImageData.width;
+                    tc.height = state.displayImageData.height;
+                    const tctx = tc.getContext('2d');
+                    tctx.putImageData(state.displayImageData, 0, 0);
+                    filmstripThumb.innerHTML = `<img src="${tc.toDataURL('image/jpeg',0.6)}" alt="thumb">`;
                     filmstripInfo.textContent =
-                        `${state.workingWidth}×${state.workingHeight} | ${state.image?.name || 'Edited image'}`;
+                        `${state.displayImageData.width}×${state.displayImageData.height} | ${state.imageName || 'Edited'}`;
                 }
             }
 
-            // ==================== IMAGE LOADING ====================
+            function updateCurveCanvas() {
+                const cw = curveCanvas.width;
+                const ch = curveCanvas.height;
+                curveCtx.clearRect(0, 0, cw, ch);
+                curveCtx.fillStyle = '#1a1a1a';
+                curveCtx.fillRect(0, 0, cw, ch);
+                curveCtx.strokeStyle = '#444';
+                curveCtx.lineWidth = 1;
+                curveCtx.beginPath();
+                curveCtx.moveTo(0, ch);
+                curveCtx.lineTo(cw, 0);
+                curveCtx.stroke();
+                curveCtx.strokeStyle = '#888';
+                curveCtx.setLineDash([4, 4]);
+                curveCtx.beginPath();
+                curveCtx.moveTo(0, ch / 2);
+                curveCtx.lineTo(cw, ch / 2);
+                curveCtx.moveTo(cw / 2, 0);
+                curveCtx.lineTo(cw / 2, ch);
+                curveCtx.stroke();
+                curveCtx.setLineDash([]);
+                curveCtx.strokeStyle = '#4da6e8';
+                curveCtx.lineWidth = 2.5;
+                curveCtx.shadowColor = 'rgba(77,166,232,0.5)';
+                curveCtx.shadowBlur = 8;
+                curveCtx.beginPath();
+                const pts = 50;
+                for (let i = 0; i <= pts; i++) {
+                    const t = i / pts;
+                    let adj = 0;
+                    if (t < 0.33) adj = state.adjustments.curveShadows / 100 * (1 - t / 0.33);
+                    else if (t < 0.66) adj = state.adjustments.curveMid / 100 * (1 - Math.abs(t - 0.5) / 0.17);
+                    else adj = state.adjustments.curveHigh / 100 * ((t - 0.66) / 0.34);
+                    const y = clamp(t + adj * 0.35, 0, 1);
+                    const px = t * cw;
+                    const py = (1 - y) * ch;
+                    if (i === 0) curveCtx.moveTo(px, py);
+                    else curveCtx.lineTo(px, py);
+                }
+                curveCtx.stroke();
+                curveCtx.shadowBlur = 0;
+            }
+
+            function scheduleRender() {
+                if (!state.renderPending) {
+                    state.renderPending = true;
+                    requestAnimationFrame(() => { state.renderPending = false;
+                        render(); });
+                }
+            }
+
+            // ============ IMAGE LOADING ============
             function loadImage(file) {
                 if (!file || !file.type.startsWith('image/')) return;
                 const reader = new FileReader();
@@ -1184,188 +1624,518 @@
                     const img = new Image();
                     img.onload = function() {
                         state.image = img;
-                        state.image.name = file.name;
-                        // Determine working resolution (max 1600px on longest side for performance)
-                        const maxDim = 1600;
+                        state.imageName = file.name;
+                        const maxDim = 1800;
                         let w = img.naturalWidth;
                         let h = img.naturalHeight;
                         if (Math.max(w, h) > maxDim) {
-                            const scale = maxDim / Math.max(w, h);
-                            w = Math.round(w * scale);
-                            h = Math.round(h * scale);
+                            const s = maxDim / Math.max(w, h);
+                            w = Math.round(w * s);
+                            h = Math.round(h * s);
                         }
                         state.workingWidth = w;
                         state.workingHeight = h;
-                        // Draw to offscreen canvas to get original ImageData
-                        const offscreen = document.createElement('canvas');
-                        offscreen.width = w;
-                        offscreen.height = h;
-                        const offCtx = offscreen.getContext('2d');
+                        const off = document.createElement('canvas');
+                        off.width = w;
+                        off.height = h;
+                        const offCtx = off.getContext('2d');
                         offCtx.drawImage(img, 0, 0, w, h);
                         state.originalImageData = offCtx.getImageData(0, 0, w, h);
-                        state.displayImageData = new ImageData(
-                            new Uint8ClampedArray(state.originalImageData.data),
-                            w, h
-                        );
-                        // Reset adjustments
-                        Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+                        state.displayImageData = new ImageData(new Uint8ClampedArray(state.originalImageData.data), w,
+                            h);
+                        Object.keys(state.adjustments).forEach(k => { state.adjustments[k] = defaultAdjustments[
+                            k]; });
                         state.activePreset = null;
+                        state.undoStack = [];
+                        state.redoStack = [];
+                        state.zoom = 1;
+                        state.panX = 0;
+                        state.panY = 0;
+                        state.showBefore = false;
+                        state.splitView = false;
+                        state.cropMode = false;
+                        cropOverlay.classList.remove('active');
+                        $('#btnSplitView').classList.remove('active-toggle');
+                        $('#btnBeforeAfter').classList.remove('active-toggle');
                         syncSlidersToState();
-                        updatePresetCardsHighlight();
-                        // Display
+                        updatePresetHighlight();
+                        updateUndoButtons();
+                        dropOverlay.classList.add('hidden');
+                        histoBox.style.display = 'block';
                         mainCanvas.width = w;
                         mainCanvas.height = h;
                         ctx.putImageData(state.displayImageData, 0, 0);
-                        dropZone.classList.add('hidden');
-                        histogramContainer.style.display = 'block';
                         updateHistogram(state.displayImageData);
                         updateFilmstripThumb();
+                        updateCurveCanvas();
+                        fitToView();
+                        updateViewportTransform();
+                        zoomIndicator.style.opacity = '0';
+                        $('#btnUndo').style.opacity = '0.4';
+                        $('#btnRedo').style.opacity = '0.4';
                         filmstripInfo.textContent = `${w}×${h} | ${file.name}`;
-                        // Fit canvas in view
-                        fitCanvasToView();
+                        autoSave();
                     };
                     img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
 
-            function fitCanvasToView() {
+            function fitToView() {
                 if (!state.image) return;
-                const area = document.getElementById('canvasArea');
-                const maxW = area.clientWidth * 0.9;
-                const maxH = area.clientHeight * 0.85;
+                const area = canvasArea;
+                const maxW = area.clientWidth * 0.88;
+                const maxH = area.clientHeight * 0.82;
                 const scale = Math.min(1, maxW / state.workingWidth, maxH / state.workingHeight);
-                mainCanvas.style.width = (state.workingWidth * scale) + 'px';
-                mainCanvas.style.height = (state.workingHeight * scale) + 'px';
+                state.zoom = Math.round(scale * 100) / 100;
+                state.panX = 0;
+                state.panY = 0;
+                updateViewportTransform();
+                showZoomIndicator();
             }
 
-            // ==================== EVENT HANDLERS ====================
-            document.getElementById('btnImport').addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files[0]) loadImage(e.target.files[0]);
-                fileInput.value = '';
-            });
+            function showZoomIndicator() {
+                zoomIndicator.textContent = Math.round(state.zoom * 100) + '%';
+                zoomIndicator.style.opacity = '1';
+                clearTimeout(state._zoomTimeout);
+                state._zoomTimeout = setTimeout(() => { zoomIndicator.style.opacity = '0'; }, 1500);
+            }
 
-            document.getElementById('btnExport').addEventListener('click', () => {
+            // ============ AUTO ENHANCE ============
+            function autoEnhance() {
+                if (!state.originalImageData) return;
+                pushUndo();
+                const data = state.originalImageData.data;
+                let sumLum = 0,
+                    minLum = 255,
+                    maxLum = 0;
+                const len = data.length;
+                for (let i = 0; i < len; i += 4) {
+                    const lum = getLum(data[i], data[i + 1], data[i + 2]);
+                    sumLum += lum;
+                    if (lum < minLum) minLum = lum;
+                    if (lum > maxLum) maxLum = lum;
+                }
+                const avgLum = sumLum / (len / 4);
+                state.adjustments.exposure = clamp((128 - avgLum) / 128 * 0.6, -0.5, 0.7);
+                state.adjustments.contrast = clamp((maxLum - minLum < 100 ? 25 : -10), -30, 30);
+                state.adjustments.shadows = clamp((50 - minLum) * 0.4, -30, 40);
+                state.adjustments.highlights = clamp((maxLum - 200) * -0.5, -40, 20);
+                state.adjustments.saturation = 5;
+                state.adjustments.vibrance = 10;
+                state.adjustments.clarity = 15;
+                state.activePreset = null;
+                syncSlidersToState();
+                updatePresetHighlight();
+                render();
+            }
+
+            // ============ CROP ============
+            function enterCropMode() {
+                if (!state.image) return;
+                state.cropMode = true;
+                cropOverlay.classList.add('active');
+                const w = state.workingWidth;
+                const h = state.workingHeight;
+                state.cropRect = { x: Math.round(w * 0.1), y: Math.round(h * 0.1), w: Math.round(w * 0.8), h: Math
+                        .round(h * 0.8) };
+                state.cropRatio = null;
+                updateCropBox();
+                $('#panelCrop').classList.remove('hidden');
+                switchPanel('crop');
+            }
+
+            function exitCropMode(apply) {
+                if (apply && state.cropMode) {
+                    pushUndo();
+                    state.adjustments.cropActive = true;
+                    state.adjustments.cropX = state.cropRect.x;
+                    state.adjustments.cropY = state.cropRect.y;
+                    state.adjustments.cropW = state.cropRect.w;
+                    state.adjustments.cropH = state.cropRect.h;
+                }
+                state.cropMode = false;
+                cropOverlay.classList.remove('active');
+                if (apply) render();
+            }
+
+            function updateCropBox() {
+                const cr = state.cropRect;
+                cropBox.style.left = cr.x + 'px';
+                cropBox.style.top = cr.y + 'px';
+                cropBox.style.width = cr.w + 'px';
+                cropBox.style.height = cr.h + 'px';
+            }
+
+            function setCropRatio(ratio) {
+                state.cropRatio = ratio;
+                const cr = state.cropRect;
+                if (ratio && ratio !== 'free') {
+                    const [rw, rh] = ratio.split(':').map(Number);
+                    const targetRatio = rw / rh;
+                    const newH = cr.w / targetRatio;
+                    if (newH <= state.workingHeight) cr.h = Math.round(newH);
+                    else { cr.w = Math.round(cr.h * targetRatio); }
+                    cr.x = Math.round((state.workingWidth - cr.w) / 2);
+                    cr.y = Math.round((state.workingHeight - cr.h) / 2);
+                    updateCropBox();
+                }
+            }
+
+            // Crop box drag
+            let cropDragData = null;
+            cropBox.addEventListener('mousedown', (e) => {
+                if (!state.cropMode) return;
+                if (e.target.classList.contains('crop-handle')) {
+                    cropDragData = { handle: e.target.dataset.handle, sx: e.clientX, sy: e.clientY, rect: { ...
+                            state.cropRect } };
+                } else if (e.target === cropBox) {
+                    cropDragData = { handle: 'move', sx: e.clientX, sy: e.clientY, rect: { ...state.cropRect } };
+                }
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!cropDragData || !state.cropMode) return;
+                const dx = e.clientX - cropDragData.sx;
+                const dy = e.clientY - cropDragData.sy;
+                const r = cropDragData.rect;
+                let { x, y, w, h } = r;
+                const handle = cropDragData.handle;
+                if (handle === 'move') { x = clamp(r.x + dx, 0, state.workingWidth - w);
+                    y = clamp(r.y + dy, 0, state.workingHeight - h); } else if (handle === 'br') { w = clamp(r.w + dx,
+                        20, state.workingWidth - r.x);
+                    h = clamp(r.h + dy, 20, state.workingHeight - r.y); } else if (handle === 'tl') { const nx = clamp(
+                        r.x + dx, 0, r.x + r.w - 20);
+                    const ny = clamp(r.y + dy, 0, r.y + r.h - 20);
+                    w = r.w + (r.x - nx);
+                    h = r.h + (r.y - ny);
+                    x = nx;
+                    y = ny; } else if (handle === 'tr') { w = clamp(r.w + dx, 20, state.workingWidth - r.x);
+                    const ny = clamp(r.y + dy, 0, r.y + r.h - 20);
+                    h = r.h + (r.y - ny);
+                    y = ny; } else if (handle === 'bl') { const nx = clamp(r.x + dx, 0, r.x + r.w - 20);
+                    w = r.w + (r.x - nx);
+                    x = nx;
+                    h = clamp(r.h + dy, 20, state.workingHeight - r.y); }
+                if (state.cropRatio && state.cropRatio !== 'free') {
+                    const [rw, rh] = state.cropRatio.split(':').map(Number);
+                    const tr = rw / rh;
+                    h = Math.round(w / tr);
+                    if (h > state.workingHeight - y) { h = state.workingHeight - y;
+                        w = Math.round(h * tr); }
+                }
+                state.cropRect = { x, y, w, h };
+                updateCropBox();
+            });
+            document.addEventListener('mouseup', () => { cropDragData = null; });
+
+            // ============ ZOOM & PAN ============
+            canvasArea.addEventListener('wheel', (e) => {
+                if (!state.image) return;
+                e.preventDefault();
+                const delta = -e.deltaY * 0.001;
+                const newZoom = clamp(state.zoom * (1 + delta), 0.05, 5);
+                const mx = e.clientX - canvasArea.getBoundingClientRect().left;
+                const my = e.clientY - canvasArea.getBoundingClientRect().top;
+                const ratio = newZoom / state.zoom;
+                state.panX = mx - ratio * (mx - state.panX);
+                state.panY = my - ratio * (my - state.panY);
+                state.zoom = newZoom;
+                updateViewportTransform();
+                showZoomIndicator();
+            }, { passive: false });
+
+            canvasArea.addEventListener('mousedown', (e) => {
+                if (state.cropMode) return;
+                if (e.button === 1 || e.altKey || (e.target === canvasArea && e.button === 0 && !state.image)) {
+                    state.isPanning = true;
+                    state.panStart = { x: e.clientX - state.panX, y: e.clientY - state.panY };
+                    canvasArea.classList.add('grabbing');
+                    e.preventDefault();
+                }
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (state.isPanning && !state.cropMode) {
+                    state.panX = e.clientX - state.panStart.x;
+                    state.panY = e.clientY - state.panStart.y;
+                    updateViewportTransform();
+                }
+            });
+            document.addEventListener('mouseup', () => { state.isPanning = false;
+                canvasArea.classList.remove('grabbing'); });
+
+            // ============ EVENT HANDLERS ============
+            $('#btnImport').addEventListener('click', () => $('#fileInput').click());
+            $('#fileInput').addEventListener('change', (e) => { if (e.target.files[0]) loadImage(e.target.files[0]);
+                $('#fileInput').value = ''; });
+            $('#btnExport').addEventListener('click', () => { if (state.displayImageData) $('#modalExport').classList
+                    .remove('hidden'); });
+            $('#btnExportCancel').addEventListener('click', () => $('#modalExport').classList.add('hidden'));
+            $('#btnExportConfirm').addEventListener('click', () => {
                 if (!state.displayImageData) return;
-                // Re-render at full quality for export
-                const exportCanvas = document.createElement('canvas');
-                exportCanvas.width = state.workingWidth;
-                exportCanvas.height = state.workingHeight;
-                const exportCtx = exportCanvas.getContext('2d');
-                const processed = state.showBefore ?
-                    new ImageData(new Uint8ClampedArray(state.originalImageData.data), state.workingWidth, state
-                        .workingHeight) :
-                    applyAdjustments(state.originalImageData, state.adjustments);
-                exportCtx.putImageData(processed, 0, 0);
+                const fmt = $('#exportFormat').value;
+                const qual = parseInt($('#exportQuality').value) / 100;
+                const sizeOpt = $('#exportSize').value;
+                let expData = state.displayImageData;
+                let ew = expData.width,
+                    eh = expData.height;
+                if (sizeOpt !== 'full') {
+                    const maxSz = parseInt(sizeOpt);
+                    if (Math.max(ew, eh) > maxSz) {
+                        const s = maxSz / Math.max(ew, eh);
+                        ew = Math.round(ew * s);
+                        eh = Math.round(eh * s);
+                        const tc = document.createElement('canvas');
+                        tc.width = ew;
+                        tc.height = eh;
+                        const tctx = tc.getContext('2d');
+                        const src = document.createElement('canvas');
+                        src.width = expData.width;
+                        src.height = expData.height;
+                        src.getContext('2d').putImageData(expData, 0, 0);
+                        tctx.drawImage(src, 0, 0, ew, eh);
+                        expData = tctx.getImageData(0, 0, ew, eh);
+                    }
+                }
+                const ec = document.createElement('canvas');
+                ec.width = ew;
+                ec.height = eh;
+                ec.getContext('2d').putImageData(expData, 0, 0);
+                const mime = fmt === 'png' ? 'image/png' : fmt === 'webp' ? 'image/webp' : 'image/jpeg';
                 const link = document.createElement('a');
-                link.download = 'edited_photo.jpg';
-                link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+                link.download = `edited_photo.${fmt}`;
+                link.href = ec.toDataURL(mime, qual);
                 link.click();
+                $('#modalExport').classList.add('hidden');
             });
-
-            document.getElementById('btnReset').addEventListener('click', () => {
-                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+            $('#exportQuality').addEventListener('input', function() { $('#exportQualityVal').textContent = this.value +
+                    '%'; });
+            $('#btnReset').addEventListener('click', () => {
+                if (!state.image) return;
+                pushUndo();
+                Object.keys(state.adjustments).forEach(k => { state.adjustments[k] = defaultAdjustments[k]; });
                 state.activePreset = null;
                 state.showBefore = false;
-                document.getElementById('btnBeforeAfter').classList.remove('active-toggle');
+                state.splitView = false;
+                state.cropMode = false;
+                cropOverlay.classList.remove('active');
+                $('#btnSplitView').classList.remove('active-toggle');
+                $('#btnBeforeAfter').classList.remove('active-toggle');
                 syncSlidersToState();
-                updatePresetCardsHighlight();
+                updatePresetHighlight();
                 render();
             });
-
-            const btnBeforeAfter = document.getElementById('btnBeforeAfter');
-            btnBeforeAfter.addEventListener('click', () => {
+            $('#btnAuto').addEventListener('click', autoEnhance);
+            $('#btnUndo').addEventListener('click', undo);
+            $('#btnRedo').addEventListener('click', redo);
+            $('#btnBeforeAfter').addEventListener('click', function() {
                 state.showBefore = !state.showBefore;
-                btnBeforeAfter.classList.toggle('active-toggle', state.showBefore);
+                this.classList.toggle('active-toggle', state.showBefore);
+                if (state.showBefore) state.splitView = false;
+                $('#btnSplitView').classList.remove('active-toggle');
                 render();
+            });
+            $('#btnSplitView').addEventListener('click', function() {
+                state.splitView = !state.splitView;
+                this.classList.toggle('active-toggle', state.splitView);
+                if (state.splitView) state.showBefore = false;
+                $('#btnBeforeAfter').classList.remove('active-toggle');
+                render();
+            });
+            $('#btnShortcuts').addEventListener('click', () => $('#modalShortcuts').classList.remove('hidden'));
+            $('#btnCloseShortcuts').addEventListener('click', () => $('#modalShortcuts').classList.add('hidden'));
+            $('#btnApplyCrop').addEventListener('click', () => exitCropMode(true));
+            $('#btnCancelCrop').addEventListener('click', () => exitCropMode(false));
+            $('#btnFlipH').addEventListener('click', () => { pushUndo();
+                state.adjustments.flipH = !state.adjustments.flipH;
+                render(); });
+            $('#btnFlipV').addEventListener('click', () => { pushUndo();
+                state.adjustments.flipV = !state.adjustments.flipV;
+                render(); });
+
+            // Crop ratio buttons
+            $$('.crop-ratio').forEach(b => b.addEventListener('click', function() {
+                $$('.crop-ratio').forEach(x => x.classList.remove('active-toggle'));
+                this.classList.add('active-toggle');
+                setCropRatio(this.dataset.ratio);
+            }));
+
+            // Tool panel switching
+            const toolIcons = $$('.tool-icon');
+            const panels = {
+                light: $('#panelLight'),
+                color: $('#panelColor'),
+                tone: $('#panelTone'),
+                effects: $('#panelEffects'),
+                grading: $('#panelGrading'),
+                crop: $('#panelCrop'),
+                presets: $('#panelPresets'),
+            };
+
+            function switchPanel(tool) {
+                state.selectedTool = tool;
+                toolIcons.forEach(i => i.classList.remove('active'));
+                const icon = document.querySelector(`.tool-icon[data-tool="${tool}"]`);
+                if (icon) icon.classList.add('active');
+                Object.values(panels).forEach(p => p.classList.add('hidden'));
+                if (panels[tool]) panels[tool].classList.remove('hidden');
+                if (tool === 'crop' && !state.cropMode) enterCropMode();
+                if (tool !== 'crop' && state.cropMode) exitCropMode(false);
+                if (tool === 'tone') updateCurveCanvas();
+            }
+
+            toolIcons.forEach(icon => {
+                icon.addEventListener('click', () => switchPanel(icon.dataset.tool));
             });
 
             // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                if (e.key === '\\' || e.key === 'Backslash') {
-                    e.preventDefault();
-                    if (!state.showBefore) {
-                        state.showBefore = true;
-                        btnBeforeAfter.classList.add('active-toggle');
-                        render();
-                    }
-                }
-                if (e.key === 'r' && e.ctrlKey) {
-                    e.preventDefault();
-                    document.getElementById('btnReset').click();
+                if (e.ctrlKey && e.key === 'z') { e.preventDefault();
+                    undo(); }
+                if (e.ctrlKey && e.key === 'y') { e.preventDefault();
+                    redo(); }
+                if (e.ctrlKey && e.key === 's') { e.preventDefault();
+                    $('#btnExport').click(); }
+                if (e.ctrlKey && e.key === 'r') { e.preventDefault();
+                    $('#btnReset').click(); }
+                if (e.ctrlKey && e.key === '0') { e.preventDefault();
+                    fitToView(); }
+                if (e.key === '\\') { e.preventDefault();
+                    state.showBefore = true;
+                    $('#btnBeforeAfter').classList.add('active-toggle');
+                    render(); }
+                if (e.key === 'a' && !e.ctrlKey && !e.metaKey && document.activeElement === document.body) { e
+                    .preventDefault();
+                    autoEnhance(); }
+                if (e.shiftKey && e.key === 'S') { e.preventDefault();
+                    $('#btnSplitView').click(); }
+                if (e.key === 'Escape') {
+                    if (state.cropMode) exitCropMode(false);
+                    if (!$('#modalExport').classList.contains('hidden')) $('#modalExport').classList.add(
+                        'hidden');
+                    if (!$('#modalShortcuts').classList.contains('hidden')) $('#modalShortcuts').classList.add(
+                        'hidden');
                 }
             });
             document.addEventListener('keyup', (e) => {
-                if (e.key === '\\' || e.key === 'Backslash') {
-                    e.preventDefault();
-                    state.showBefore = false;
-                    btnBeforeAfter.classList.remove('active-toggle');
-                    render();
-                }
+                if (e.key === '\\') { state.showBefore = false;
+                    $('#btnBeforeAfter').classList.remove('active-toggle');
+                    render(); }
             });
 
             // Drag and drop
-            const canvasArea = document.getElementById('canvasArea');
-            canvasArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                canvasArea.style.background = '#1a1a1a';
-            });
-            canvasArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                canvasArea.style.background = '#111';
-            });
+            canvasArea.addEventListener('dragover', (e) => { e.preventDefault();
+                canvasArea.style.background = '#151515'; });
+            canvasArea.addEventListener('dragleave', () => { canvasArea.style.background = '#0d0d0d'; });
             canvasArea.addEventListener('drop', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                canvasArea.style.background = '#111';
+                canvasArea.style.background = '#0d0d0d';
                 const file = e.dataTransfer.files[0];
                 if (file) loadImage(file);
             });
 
-            // Tool panel switching
-            const toolIcons = document.querySelectorAll('.tool-icon');
-            const panels = {
-                light: document.getElementById('panelLight'),
-                color: document.getElementById('panelColor'),
-                effects: document.getElementById('panelEffects'),
-                presets: document.getElementById('panelPresets'),
-            };
-
-            toolIcons.forEach(icon => {
-                icon.addEventListener('click', () => {
-                    const tool = icon.dataset.tool;
-                    state.selectedTool = tool;
-                    toolIcons.forEach(i => i.classList.remove('active'));
-                    icon.classList.add('active');
-                    Object.values(panels).forEach(p => p.classList.add('hidden'));
-                    if (panels[tool]) panels[tool].classList.remove('hidden');
-                });
-            });
-
-            // Filmstrip thumb click
+            // Filmstrip
             filmstripThumb.addEventListener('click', () => {
-                if (state.image) {
-                    state.showBefore = false;
-                    btnBeforeAfter.classList.remove('active-toggle');
-                    render();
-                }
+                if (state.image) { state.showBefore = false;
+                    state.splitView = false;
+                    $('#btnBeforeAfter').classList.remove('active-toggle');
+                    $('#btnSplitView').classList.remove('active-toggle');
+                    fitToView();
+                    render(); }
             });
 
-            // Window resize
-            window.addEventListener('resize', fitCanvasToView);
+            // Close modals on overlay click
+            $$('.modal-overlay').forEach(ov => ov.addEventListener('click', function(e) { if (e.target === this) this
+                    .classList.add('hidden'); }));
 
-            // ==================== INITIAL STATE ====================
+            // Auto-save
+            function autoSave() {
+                if (!state.originalImageData) return;
+                try {
+                    const saveData = {
+                        adjustments: state.adjustments,
+                        imageName: state.imageName,
+                        workingWidth: state.workingWidth,
+                        workingHeight: state.workingHeight,
+                        originalDataURL: state.image ? state.image.src : null,
+                        timestamp: Date.now(),
+                    };
+                    localStorage.setItem('lumina_autosave', JSON.stringify(saveData));
+                } catch (e) { /* storage full, ignore */ }
+            }
+
+            function checkAutoSave() {
+                try {
+                    const saved = localStorage.getItem('lumina_autosave');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (data.originalDataURL && Date.now() - data.timestamp < 86400000) {
+                            const img = new Image();
+                            img.onload = function() {
+                                state.image = img;
+                                state.imageName = data.imageName || 'Restored';
+                                const maxDim = 1800;
+                                let w = img.naturalWidth;
+                                let h = img.naturalHeight;
+                                if (Math.max(w, h) > maxDim) {
+                                    const s = maxDim / Math.max(w, h);
+                                    w = Math.round(w * s);
+                                    h = Math.round(h * s);
+                                }
+                                state.workingWidth = w;
+                                state.workingHeight = h;
+                                const off = document.createElement('canvas');
+                                off.width = w;
+                                off.height = h;
+                                const offCtx = off.getContext('2d');
+                                offCtx.drawImage(img, 0, 0, w, h);
+                                state.originalImageData = offCtx.getImageData(0, 0, w, h);
+                                state.displayImageData = new ImageData(new Uint8ClampedArray(state
+                                    .originalImageData.data), w, h);
+                                if (data.adjustments) Object.keys(data.adjustments).forEach(k => { if (state
+                                        .adjustments.hasOwnProperty(k)) state.adjustments[k] = data
+                                        .adjustments[k]; });
+                                syncSlidersToState();
+                                dropOverlay.classList.add('hidden');
+                                histoBox.style.display = 'block';
+                                mainCanvas.width = w;
+                                mainCanvas.height = h;
+                                ctx.putImageData(state.displayImageData, 0, 0);
+                                updateHistogram(state.displayImageData);
+                                updateFilmstripThumb();
+                                updateCurveCanvas();
+                                fitToView();
+                                updateViewportTransform();
+                                filmstripInfo.textContent = `${w}×${h} | ${state.imageName} (restored)`;
+                            };
+                            img.src = data.originalDataURL;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // Save on adjustments change
+            const origPushUndo = pushUndo;
+            pushUndo = function() { origPushUndo();
+                autoSave(); };
+
+            // ============ INIT ============
             syncSlidersToState();
-            histogramContainer.style.display = 'none';
-            console.log('🖼️ Lightroom Online ready!');
-            console.log('  - Drag & drop an image to start editing');
-            console.log('  - Use left panel tools to adjust');
-            console.log('  - Press \\ key to toggle before/after');
-            console.log('  - Click Export to download your edited photo');
-            console.log('  - Try the Presets for instant looks!');
+            updateUndoButtons();
+            $('#btnUndo').style.opacity = '0.4';
+            $('#btnRedo').style.opacity = '0.4';
+            histoBox.style.display = 'none';
+            updateCurveCanvas();
+            updateViewportTransform();
+            checkAutoSave();
+
+            console.log('🚀 Lumina Edit Pro ready!');
+            console.log('  • Drop an image or click Open to start');
+            console.log('  • All editing tools in the left panel');
+            console.log('  • Ctrl+Z/Y for undo/redo, Ctrl+S to export');
+            console.log('  • Hold \\ for before view, Shift+S for split view');
+            console.log('  • Scroll to zoom, Space+drag to pan');
+            console.log('  • Auto-save preserves your work in this browser');
         })();
     </script>
 </body>
