@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightroom Online - Photo Editor</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #252525;
+            --bg-panel: #212121;
+            --border: #333;
+            --border-active: #555;
+            --text-primary: #ddd;
+            --text-secondary: #999;
+            --text-muted: #777;
+            --accent: #5b9bd5;
+            --accent-hover: #7ab8e8;
+            --accent-dim: #3a7ab5;
+            --slider-track: #444;
+            --slider-fill: #5b9bd5;
+            --danger: #d94f4f;
+            --btn-bg: #333;
+            --btn-hover: #444;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --radius: 6px;
+            --radius-sm: 4px;
+            --transition: 0.15s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 44px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 12px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+        .topbar .logo .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5b9bd5, #7ab8e8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            font-weight: 700;
+        }
+        .topbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .btn {
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--btn-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            transition: all var(--transition);
+            white-space: nowrap;
+            font-family: var(--font);
+        }
+        .btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--border-active);
+        }
+        .btn.accent {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: #fff;
+        }
+        .btn.accent:hover {
+            background: var(--accent);
+        }
+        .btn.icon-btn {
+            padding: 7px 10px;
+            font-size: 14px;
+            min-width: 32px;
+            text-align: center;
+        }
+        .btn.active-toggle {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* LEFT SIDEBAR */
+        .left-sidebar {
+            width: 48px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 8px;
+            flex-shrink: 0;
+            z-index: 5;
+        }
+        .tool-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .tool-icon:hover {
+            background: var(--bg-tertiary);
+            color: #fff;
+        }
+        .tool-icon.active {
+            background: var(--accent-dim);
+            color: #fff;
+        }
+        .tool-icon.active::after {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* TOOL PANEL */
+        .tool-panel {
+            width: 280px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 4;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #222;
+        }
+        .tool-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .tool-panel::-webkit-scrollbar-track {
+            background: #222;
+        }
+        .tool-panel::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+        .tool-panel.hidden {
+            display: none;
+        }
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .panel-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .slider-label span.val {
+            color: var(--text-muted);
+            min-width: 30px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--slider-track);
+            outline: none;
+            cursor: pointer;
+            margin: 3px 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            border-color: #fff;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 2px 0;
+        }
+
+        /* CANVAS AREA */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 95%;
+            max-height: 90%;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 2px;
+        }
+        canvas#mainCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            border-radius: 2px;
+            image-rendering: auto;
+        }
+        .drop-zone {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .drop-zone .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .drop-zone p {
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .drop-zone .sub {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+        .drop-zone.hidden {
+            display: none;
+        }
+
+        /* HISTOGRAM */
+        .histogram-container {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: var(--radius);
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            z-index: 3;
+        }
+        canvas#histogramCanvas {
+            display: block;
+            width: 180px;
+            height: 60px;
+        }
+        .histogram-label {
+            text-align: center;
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* BOTTOM FILMSTRIP */
+        .filmstrip {
+            height: 72px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 8px;
+            flex-shrink: 0;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #222;
+        }
+        .filmstrip::-webkit-scrollbar {
+            height: 4px;
+        }
+        .filmstrip::-webkit-scrollbar-track {
+            background: #222;
+        }
+        .filmstrip::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+        .filmstrip-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .filmstrip-thumb.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(91, 155, 213, 0.4);
+        }
+        .filmstrip-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .filmstrip-thumb .placeholder {
+            color: #555;
+            font-size: 20px;
+        }
+        .filmstrip-info {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+
+        /* PRESETS GRID */
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .preset-card {
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            padding: 10px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .preset-card:hover {
+            border-color: var(--border-active);
+            background: #2a2a2a;
+        }
+        .preset-card.active {
+            border-color: var(--accent);
+            background: #1e2d3a;
+            color: #fff;
+        }
+        .preset-card .preset-swatch {
+            width: 100%;
+            height: 28px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .preset-card .preset-name {
+            font-weight: 500;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .tool-panel {
+                width: 240px;
+                padding: 8px 12px;
+                gap: 8px;
+            }
+            .left-sidebar {
+                width: 38px;
+            }
+            .tool-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+            .histogram-container {
+                top: 4px;
+                right: 4px;
+            }
+            canvas#histogramCanvas {
+                width: 120px;
+                height: 40px;
+            }
+            .filmstrip {
+                height: 56px;
+            }
+            .filmstrip-thumb {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="logo">
+            <div class="dot">L</div>
+            <span>Lightroom Online</span>
+        </div>
+        <div class="topbar-actions">
+            <button class="btn icon-btn" id="btnBeforeAfter" title="Before/After (Press \ key)">↔</button>
+            <button class="btn" id="btnReset" title="Reset all adjustments">↺ Reset</button>
+            <button class="btn" id="btnImport" title="Import image">📁 Import</button>
+            <button class="btn accent" id="btnExport" title="Export edited image">⬇ Export</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+        <!-- LEFT SIDEBAR ICONS -->
+        <div class="left-sidebar" id="leftSidebar">
+            <div class="tool-icon active" data-tool="light" title="Light">☀️</div>
+            <div class="tool-icon" data-tool="color" title="Color">🎨</div>
+            <div class="tool-icon" data-tool="effects" title="Effects">✨</div>
+            <div class="tool-icon" data-tool="presets" title="Presets">💠</div>
+        </div>
+
+        <!-- TOOL PANELS -->
+        <div class="tool-panel" id="panelLight">
+            <div class="panel-section">
+                <div class="panel-section-title">💡 Light</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Exposure</span><span class="val" id="valExposure">0.00</span></div>
+                    <input type="range" id="sliderExposure" min="-300" max="300" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Contrast</span><span class="val" id="valContrast">0</span></div>
+                    <input type="range" id="sliderContrast" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Highlights</span><span class="val" id="valHighlights">0</span></div>
+                    <input type="range" id="sliderHighlights" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Shadows</span><span class="val" id="valShadows">0</span></div>
+                    <input type="range" id="sliderShadows" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Whites</span><span class="val" id="valWhites">0</span></div>
+                    <input type="range" id="sliderWhites" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Blacks</span><span class="val" id="valBlacks">0</span></div>
+                    <input type="range" id="sliderBlacks" min="-100" max="100" value="0" step="1">
+                </div>
+            </div>
+            <hr class="divider">
+            <div class="panel-section">
+                <div class="panel-section-title">🔆 Brightness</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Brightness</span><span class="val" id="valBrightness">0</span></div>
+                    <input type="range" id="sliderBrightness" min="-100" max="100" value="0" step="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-panel hidden" id="panelColor">
+            <div class="panel-section">
+                <div class="panel-section-title">🎨 Color</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Temperature</span><span class="val" id="valTemperature">0</span></div>
+                    <input type="range" id="sliderTemperature" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Tint</span><span class="val" id="valTint">0</span></div>
+                    <input type="range" id="sliderTint" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Saturation</span><span class="val" id="valSaturation">0</span></div>
+                    <input type="range" id="sliderSaturation" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Vibrance</span><span class="val" id="valVibrance">0</span></div>
+                    <input type="range" id="sliderVibrance" min="-100" max="100" value="0" step="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-panel hidden" id="panelEffects">
+            <div class="panel-section">
+                <div class="panel-section-title">✨ Effects</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Clarity</span><span class="val" id="valClarity">0</span></div>
+                    <input type="range" id="sliderClarity" min="-100" max="100" value="0" step="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Fade</span><span class="val" id="valFade">0</span></div>
+                    <input type="range" id="sliderFade" min="0" max="100" value="0" step="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="tool-panel hidden" id="panelPresets">
+            <div class="panel-section">
+                <div class="panel-section-title">💠 Presets</div>
+                <div class="presets-grid" id="presetsGrid">
+                    <!-- Generated by JS -->
+                </div>
+                <button class="btn" id="btnClearPreset" style="margin-top:8px;width:100%;">Clear Preset</button>
+            </div>
+        </div>
+
+        <!-- CANVAS AREA -->
+        <div class="canvas-area" id="canvasArea">
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <canvas id="mainCanvas"></canvas>
+                <div class="drop-zone" id="dropZone">
+                    <div class="icon">🖼️</div>
+                    <p>Drag & Drop an image here</p>
+                    <p class="sub">or click Import to get started</p>
+                </div>
+            </div>
+            <div class="histogram-container" id="histogramContainer" style="display:none;">
+                <canvas id="histogramCanvas" width="180" height="60"></canvas>
+                <div class="histogram-label">Histogram</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM FILMSTRIP -->
+    <div class="filmstrip" id="filmstrip">
+        <div class="filmstrip-thumb active" id="filmstripThumb">
+            <span class="placeholder">🖼️</span>
+        </div>
+        <span class="filmstrip-info" id="filmstripInfo">No image loaded</span>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+
+    <script>
+        (function() {
+            // ==================== DOM ELEMENTS ====================
+            const mainCanvas = document.getElementById('mainCanvas');
+            const ctx = mainCanvas.getContext('2d');
+            const histogramCanvas = document.getElementById('histogramCanvas');
+            const histCtx = histogramCanvas.getContext('2d');
+            const histogramContainer = document.getElementById('histogramContainer');
+            const dropZone = document.getElementById('dropZone');
+            const canvasWrapper = document.getElementById('canvasWrapper');
+            const filmstripThumb = document.getElementById('filmstripThumb');
+            const filmstripInfo = document.getElementById('filmstripInfo');
+            const fileInput = document.getElementById('fileInput');
+            const presetsGrid = document.getElementById('presetsGrid');
+
+            // ==================== STATE ====================
+            const state = {
+                image: null, // The loaded HTMLImageElement
+                originalImageData: null, // ImageData of original (at working resolution)
+                workingWidth: 0,
+                workingHeight: 0,
+                displayImageData: null, // Current displayed ImageData
+                adjustments: {
+                    exposure: 0, // -3 to +3 (stored as -300 to 300 in slider, divided by 100)
+                    contrast: 0, // -100 to 100
+                    highlights: 0, // -100 to 100
+                    shadows: 0, // -100 to 100
+                    whites: 0, // -100 to 100
+                    blacks: 0, // -100 to 100
+                    brightness: 0, // -100 to 100
+                    temperature: 0, // -100 to 100
+                    tint: 0, // -100 to 100
+                    saturation: 0, // -100 to 100
+                    vibrance: 0, // -100 to 100
+                    clarity: 0, // -100 to 100
+                    fade: 0, // 0 to 100
+                },
+                selectedTool: 'light',
+                activePreset: null,
+                showBefore: false,
+                renderPending: false,
+            };
+
+            // ==================== PRESETS ====================
+            const presets = [{
+                id: 'vintage',
+                name: 'Vintage',
+                icon: '📷',
+                swatch: 'linear-gradient(135deg, #c9a96e, #8b7355)',
+                adjustments: { exposure: 0.1, contrast: -20, saturation: -25, temperature: 15,
+                    highlights: -30, shadows: 25, fade: 15 }
+            }, {
+                id: 'bw',
+                name: 'Black & White',
+                icon: '⬛',
+                swatch: 'linear-gradient(135deg, #555, #111)',
+                adjustments: { saturation: -100, contrast: 25, highlights: -10, shadows: 10 }
+            }, {
+                id: 'warm',
+                name: 'Warm Glow',
+                icon: '☀️',
+                swatch: 'linear-gradient(135deg, #f4a460, #daa520)',
+                adjustments: { temperature: 35, tint: 8, exposure: 0.15, saturation: 10, vibrance: 15 }
+            }, {
+                id: 'cool',
+                name: 'Cool Blue',
+                icon: '❄️',
+                swatch: 'linear-gradient(135deg, #87ceeb, #4682b4)',
+                adjustments: { temperature: -35, tint: -8, saturation: 5, contrast: 10 }
+            }, {
+                id: 'cinematic',
+                name: 'Cinematic',
+                icon: '🎬',
+                swatch: 'linear-gradient(135deg, #2c3e50, #1a1a2e)',
+                adjustments: { contrast: 20, highlights: -25, shadows: 20, blacks: -25, temperature: 8,
+                    saturation: -15, fade: 10 }
+            }, {
+                id: 'crossprocess',
+                name: 'Cross Process',
+                icon: '🌀',
+                swatch: 'linear-gradient(135deg, #e74c3c, #f39c12)',
+                adjustments: { contrast: 35, saturation: 35, temperature: 20, tint: 25, highlights: -15 }
+            }, {
+                id: 'fade',
+                name: 'Faded Film',
+                icon: '🎞️',
+                swatch: 'linear-gradient(135deg, #b8a99a, #8c7b6b)',
+                adjustments: { blacks: 40, contrast: -25, saturation: -20, fade: 35, highlights: -20 }
+            }, {
+                id: 'brightairy',
+                name: 'Bright & Airy',
+                icon: '☁️',
+                swatch: 'linear-gradient(135deg, #fff8f0, #f0e6d8)',
+                adjustments: { exposure: 0.7, contrast: -15, highlights: 25, shadows: 35, saturation: -10,
+                    fade: 5 }
+            }, {
+                id: 'moody',
+                name: 'Moody Dark',
+                icon: '🌙',
+                swatch: 'linear-gradient(135deg, #1a1a2e, #0d0d1a)',
+                adjustments: { exposure: -0.35, contrast: 25, saturation: -35, blacks: -30, shadows: -15,
+                    highlights: -20 }
+            }, {
+                id: 'goldenhour',
+                name: 'Golden Hour',
+                icon: '🌅',
+                swatch: 'linear-gradient(135deg, #f9a825, #ef6c00)',
+                adjustments: { temperature: 40, exposure: 0.25, contrast: -8, highlights: -15, saturation: 15,
+                    vibrance: 20, tint: 10 }
+            }, ];
+            const activePresetAdjustments = null; // Track if a preset is active
+
+            // ==================== BUILD PRESETS UI ====================
+            function buildPresetsGrid() {
+                presetsGrid.innerHTML = '';
+                presets.forEach(preset => {
+                    const card = document.createElement('div');
+                    card.className = 'preset-card';
+                    card.dataset.presetId = preset.id;
+                    card.innerHTML = `
+                            <div class="preset-swatch" style="background:${preset.swatch};">
+                                <span>${preset.icon}</span>
+                            </div>
+                            <div class="preset-name">${preset.name}</div>
+                        `;
+                    card.addEventListener('click', () => applyPreset(preset));
+                    presetsGrid.appendChild(card);
+                });
+            }
+            buildPresetsGrid();
+
+            function applyPreset(preset) {
+                // Reset all adjustments first
+                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+                // Apply preset adjustments
+                Object.entries(preset.adjustments).forEach(([key, value]) => {
+                    if (state.adjustments.hasOwnProperty(key)) {
+                        state.adjustments[key] = value;
+                    }
+                });
+                state.activePreset = preset.id;
+                syncSlidersToState();
+                updatePresetCardsHighlight();
+                render();
+            }
+
+            function clearPreset() {
+                state.activePreset = null;
+                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+                syncSlidersToState();
+                updatePresetCardsHighlight();
+                render();
+            }
+
+            function updatePresetCardsHighlight() {
+                document.querySelectorAll('.preset-card').forEach(card => {
+                    card.classList.toggle('active', card.dataset.presetId === state.activePreset);
+                });
+            }
+
+            document.getElementById('btnClearPreset').addEventListener('click', clearPreset);
+
+            // ==================== SLIDER MAPPING ====================
+            const sliderMap = {
+                sliderExposure: { key: 'exposure', transform: v => v / 100, format: v => (v / 100).toFixed(2),
+                    valId: 'valExposure' },
+                sliderContrast: { key: 'contrast', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valContrast' },
+                sliderHighlights: { key: 'highlights', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valHighlights' },
+                sliderShadows: { key: 'shadows', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valShadows' },
+                sliderWhites: { key: 'whites', transform: v => v, format: v => Math.round(v).toString(),
+                valId: 'valWhites' },
+                sliderBlacks: { key: 'blacks', transform: v => v, format: v => Math.round(v).toString(),
+                valId: 'valBlacks' },
+                sliderBrightness: { key: 'brightness', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valBrightness' },
+                sliderTemperature: { key: 'temperature', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valTemperature' },
+                sliderTint: { key: 'tint', transform: v => v, format: v => Math.round(v).toString(), valId: 'valTint' },
+                sliderSaturation: { key: 'saturation', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valSaturation' },
+                sliderVibrance: { key: 'vibrance', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valVibrance' },
+                sliderClarity: { key: 'clarity', transform: v => v, format: v => Math.round(v).toString(),
+                    valId: 'valClarity' },
+                sliderFade: { key: 'fade', transform: v => v, format: v => Math.round(v).toString(), valId: 'valFade' },
+            };
+
+            function syncSlidersToState() {
+                Object.entries(sliderMap).forEach(([sliderId, { key, transform, format, valId }]) => {
+                    const slider = document.getElementById(sliderId);
+                    const valEl = document.getElementById(valId);
+                    if (slider && valEl) {
+                        const rawValue = state.adjustments[key];
+                        // Reverse transform for slider position
+                        const sliderValue = key === 'exposure' ? Math.round(rawValue * 100) : Math.round(
+                            rawValue);
+                        slider.value = sliderValue;
+                        valEl.textContent = format(rawValue);
+                    }
+                });
+                updatePresetCardsHighlight();
+            }
+
+            function syncStateToSliders() {
+                Object.entries(sliderMap).forEach(([sliderId, { key, transform }]) => {
+                    const slider = document.getElementById(sliderId);
+                    if (slider) {
+                        state.adjustments[key] = transform(parseFloat(slider.value));
+                    }
+                });
+                updateAllSliderLabels();
+                state.activePreset = null;
+                updatePresetCardsHighlight();
+            }
+
+            function updateAllSliderLabels() {
+                Object.entries(sliderMap).forEach(([sliderId, { key, format, valId }]) => {
+                    const valEl = document.getElementById(valId);
+                    if (valEl) {
+                        valEl.textContent = format(state.adjustments[key]);
+                    }
+                });
+            }
+
+            // Attach slider listeners
+            Object.keys(sliderMap).forEach(sliderId => {
+                const slider = document.getElementById(sliderId);
+                if (slider) {
+                    slider.addEventListener('input', () => {
+                        syncStateToSliders();
+                        scheduleRender();
+                    });
+                }
+            });
+
+            // ==================== RENDER SCHEDULER ====================
+            function scheduleRender() {
+                if (!state.renderPending) {
+                    state.renderPending = true;
+                    requestAnimationFrame(() => {
+                        state.renderPending = false;
+                        render();
+                    });
+                }
+            }
+
+            // ==================== IMAGE PROCESSING ====================
+            function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+            function rgbToHsl(r, g, b) {
+                r /= 255;
+                g /= 255;
+                b /= 255;
+                const max = Math.max(r, g, b),
+                    min = Math.min(r, g, b);
+                let h, s, l = (max + min) / 2;
+                if (max === min) { h = s = 0; } else {
+                    const d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case r:
+                            h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+                            break;
+                        case g:
+                            h = ((b - r) / d + 2) / 6;
+                            break;
+                        case b:
+                            h = ((r - g) / d + 4) / 6;
+                            break;
+                    }
+                }
+                return { h, s, l };
+            }
+
+            function hslToRgb(h, s, l) {
+                let r, g, b;
+                if (s === 0) { r = g = b = l; } else {
+                    const hue2rgb = (p, q, t) => {
+                        if (t < 0) t += 1;
+                        if (t > 1) t -= 1;
+                        if (t < 1 / 6) return p + (q - p) * 6 * t;
+                        if (t < 1 / 2) return q;
+                        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                        return p;
+                    };
+                    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                    const p = 2 * l - q;
+                    r = hue2rgb(p, q, h + 1 / 3);
+                    g = hue2rgb(p, q, h);
+                    b = hue2rgb(p, q, h - 1 / 3);
+                }
+                return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+            }
+
+            function getLuminance(r, g, b) {
+                return 0.299 * r + 0.587 * g + 0.114 * b;
+            }
+
+            function applyAdjustments(sourceData, adjustments) {
+                const data = new Uint8ClampedArray(sourceData.data);
+                const len = data.length;
+                const adj = adjustments;
+
+                // Pre-compute exposure multiplier
+                const exposureMult = Math.pow(2, adj.exposure);
+
+                for (let i = 0; i < len; i += 4) {
+                    let r = data[i];
+                    let g = data[i + 1];
+                    let b = data[i + 2];
+
+                    // --- Exposure ---
+                    r = clamp(r * exposureMult, 0, 255);
+                    g = clamp(g * exposureMult, 0, 255);
+                    b = clamp(b * exposureMult, 0, 255);
+
+                    // --- Brightness ---
+                    const brightOffset = adj.brightness * 2.55;
+                    r = clamp(r + brightOffset, 0, 255);
+                    g = clamp(g + brightOffset, 0, 255);
+                    b = clamp(b + brightOffset, 0, 255);
+
+                    // --- Contrast ---
+                    if (adj.contrast !== 0) {
+                        const contrastFactor = (259 * (adj.contrast + 255)) / (255 * (259 - adj.contrast));
+                        const contrastMid = 128;
+                        r = clamp(contrastFactor * (r - contrastMid) + contrastMid, 0, 255);
+                        g = clamp(contrastFactor * (g - contrastMid) + contrastMid, 0, 255);
+                        b = clamp(contrastFactor * (b - contrastMid) + contrastMid, 0, 255);
+                    }
+
+                    // --- Highlights & Shadows ---
+                    const lum = getLuminance(r, g, b);
+                    if (adj.highlights !== 0 && lum > 128) {
+                        const factor = 1 + (adj.highlights / 100) * ((lum - 128) / 127);
+                        r = clamp(r * factor, 0, 255);
+                        g = clamp(g * factor, 0, 255);
+                        b = clamp(b * factor, 0, 255);
+                    }
+                    if (adj.shadows !== 0 && lum < 128) {
+                        const factor = 1 + (adj.shadows / 100) * ((128 - lum) / 128);
+                        r = clamp(r * factor, 0, 255);
+                        g = clamp(g * factor, 0, 255);
+                        b = clamp(b * factor, 0, 255);
+                    }
+
+                    // --- Whites & Blacks ---
+                    if (adj.whites !== 0 && lum > 192) {
+                        const wFactor = 1 + adj.whites / 100;
+                        r = clamp(r * wFactor, 0, 255);
+                        g = clamp(g * wFactor, 0, 255);
+                        b = clamp(b * wFactor, 0, 255);
+                    }
+                    if (adj.blacks !== 0 && lum < 64) {
+                        const bFactor = 1 + adj.blacks / 100;
+                        r = clamp(r * bFactor, 0, 255);
+                        g = clamp(g * bFactor, 0, 255);
+                        b = clamp(b * bFactor, 0, 255);
+                    }
+
+                    // --- Temperature (warm/cool) ---
+                    if (adj.temperature !== 0) {
+                        const tempFactor = adj.temperature / 100;
+                        if (tempFactor > 0) {
+                            // Warmer: more red, less blue
+                            r = clamp(r * (1 + tempFactor * 0.4), 0, 255);
+                            b = clamp(b * (1 - tempFactor * 0.3), 0, 255);
+                        } else {
+                            // Cooler: more blue, less red
+                            const cool = Math.abs(tempFactor);
+                            b = clamp(b * (1 + cool * 0.4), 0, 255);
+                            r = clamp(r * (1 - cool * 0.3), 0, 255);
+                        }
+                    }
+
+                    // --- Tint (green/magenta) ---
+                    if (adj.tint !== 0) {
+                        const tintFactor = adj.tint / 100;
+                        if (tintFactor > 0) {
+                            // Magenta: boost R and B
+                            r = clamp(r * (1 + tintFactor * 0.25), 0, 255);
+                            b = clamp(b * (1 + tintFactor * 0.25), 0, 255);
+                            g = clamp(g * (1 - tintFactor * 0.2), 0, 255);
+                        } else {
+                            // Green: boost G
+                            const greenF = Math.abs(tintFactor);
+                            g = clamp(g * (1 + greenF * 0.3), 0, 255);
+                            r = clamp(r * (1 - greenF * 0.15), 0, 255);
+                            b = clamp(b * (1 - greenF * 0.15), 0, 255);
+                        }
+                    }
+
+                    // --- Saturation ---
+                    if (adj.saturation !== 0) {
+                        const hsl = rgbToHsl(r, g, b);
+                        hsl.s = clamp(hsl.s * (1 + adj.saturation / 100), 0, 1);
+                        const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                        r = rgb.r;
+                        g = rgb.g;
+                        b = rgb.b;
+                    }
+
+                    // --- Vibrance ---
+                    if (adj.vibrance !== 0) {
+                        const hsl = rgbToHsl(r, g, b);
+                        const vibBoost = adj.vibrance / 100;
+                        // Vibrance boosts less-saturated colors more
+                        const weight = 1 - hsl.s; // Higher weight for low saturation
+                        hsl.s = clamp(hsl.s + vibBoost * weight * 0.6, 0, 1);
+                        if (adj.vibrance < 0) {
+                            hsl.s = clamp(hsl.s * (1 + vibBoost * 0.5), 0, 1);
+                        }
+                        const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                        r = rgb.r;
+                        g = rgb.g;
+                        b = rgb.b;
+                    }
+
+                    // --- Fade (lift blacks, reduce contrast at low end) ---
+                    if (adj.fade > 0) {
+                        const fadeAmount = adj.fade / 100;
+                        // Blend toward a gray midtone for the darkest parts
+                        const fadeLum = getLuminance(r, g, b);
+                        const fadeWeight = Math.max(0, 1 - fadeLum / 128) * fadeAmount;
+                        const fadeTarget = 80;
+                        r = r + (fadeTarget - r) * fadeWeight;
+                        g = g + (fadeTarget - g) * fadeWeight;
+                        b = b + (fadeTarget - b) * fadeWeight;
+                        r = clamp(r, 0, 255);
+                        g = clamp(g, 0, 255);
+                        b = clamp(b, 0, 255);
+                    }
+
+                    data[i] = clamp(Math.round(r), 0, 255);
+                    data[i + 1] = clamp(Math.round(g), 0, 255);
+                    data[i + 2] = clamp(Math.round(b), 0, 255);
+                }
+
+                // --- Clarity (simplified unsharp mask / local contrast) ---
+                if (adj.clarity !== 0 && state.workingWidth > 0) {
+                    const clarityAmount = adj.clarity / 100;
+                    const w = state.workingWidth;
+                    const h = state.workingHeight;
+                    const tempData = new Uint8ClampedArray(data);
+                    const radius = 8;
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            const idx = (y * w + x) * 4;
+                            let sumR = 0,
+                                sumG = 0,
+                                sumB = 0,
+                                count = 0;
+                            for (let dy = -radius; dy <= radius; dy += radius) {
+                                for (let dx = -radius; dx <= radius; dx += radius) {
+                                    const nx = clamp(x + dx, 0, w - 1);
+                                    const ny = clamp(y + dy, 0, h - 1);
+                                    const nIdx = (ny * w + nx) * 4;
+                                    sumR += tempData[nIdx];
+                                    sumG += tempData[nIdx + 1];
+                                    sumB += tempData[nIdx + 2];
+                                    count++;
+                                }
+                            }
+                            const avgR = sumR / count;
+                            const avgG = sumG / count;
+                            const avgB = sumB / count;
+                            const detailR = tempData[idx] - avgR;
+                            const detailG = tempData[idx + 1] - avgG;
+                            const detailB = tempData[idx + 2] - avgB;
+                            data[idx] = clamp(tempData[idx] + detailR * clarityAmount * 0.8, 0, 255);
+                            data[idx + 1] = clamp(tempData[idx + 1] + detailG * clarityAmount * 0.8, 0, 255);
+                            data[idx + 2] = clamp(tempData[idx + 2] + detailB * clarityAmount * 0.8, 0, 255);
+                        }
+                    }
+                }
+
+                return new ImageData(data, state.workingWidth, state.workingHeight);
+            }
+
+            // ==================== RENDER ====================
+            function render() {
+                if (!state.originalImageData) return;
+
+                const processedData = state.showBefore ?
+                    new ImageData(
+                        new Uint8ClampedArray(state.originalImageData.data),
+                        state.workingWidth,
+                        state.workingHeight
+                    ) :
+                    applyAdjustments(state.originalImageData, state.adjustments);
+
+                state.displayImageData = processedData;
+                mainCanvas.width = state.workingWidth;
+                mainCanvas.height = state.workingHeight;
+                ctx.putImageData(processedData, 0, 0);
+                updateHistogram(processedData);
+                updateFilmstripThumb();
+            }
+
+            function updateHistogram(imageData) {
+                const data = imageData.data;
+                const bins = new Array(256).fill(0);
+                const len = data.length;
+                for (let i = 0; i < len; i += 4) {
+                    const lum = Math.round(getLuminance(data[i], data[i + 1], data[i + 2]));
+                    bins[clamp(lum, 0, 255)]++;
+                }
+                const maxCount = Math.max(1, ...bins);
+                const w = histogramCanvas.width;
+                const h = histogramCanvas.height;
+                histCtx.clearRect(0, 0, w, h);
+                // Background
+                histCtx.fillStyle = 'rgba(20,20,20,0.6)';
+                histCtx.fillRect(0, 0, w, h);
+                // Draw bars
+                const barWidth = w / 256;
+                for (let i = 0; i < 256; i++) {
+                    const barHeight = (bins[i] / maxCount) * h;
+                    const x = i * barWidth;
+                    const y = h - barHeight;
+                    // Color gradient based on position
+                    const alpha = 0.55 + (bins[i] / maxCount) * 0.45;
+                    if (i < 85) {
+                        histCtx.fillStyle = `rgba(80,80,80,${alpha})`;
+                    } else if (i < 170) {
+                        histCtx.fillStyle = `rgba(160,160,160,${alpha})`;
+                    } else {
+                        histCtx.fillStyle = `rgba(220,220,220,${alpha})`;
+                    }
+                    histCtx.fillRect(x, y, Math.max(1, barWidth - 0.5), barHeight);
+                }
+                // Subtle grid line at 50%
+                histCtx.strokeStyle = 'rgba(255,255,255,0.08)';
+                histCtx.beginPath();
+                histCtx.moveTo(0, h / 2);
+                histCtx.lineTo(w, h / 2);
+                histCtx.stroke();
+            }
+
+            function updateFilmstripThumb() {
+                if (state.displayImageData && state.workingWidth > 0) {
+                    const thumbCanvas = document.createElement('canvas');
+                    thumbCanvas.width = state.workingWidth;
+                    thumbCanvas.height = state.workingHeight;
+                    const thumbCtx = thumbCanvas.getContext('2d');
+                    thumbCtx.putImageData(state.displayImageData, 0, 0);
+                    const dataUrl = thumbCanvas.toDataURL('image/jpeg', 0.7);
+                    filmstripThumb.innerHTML = `<img src="${dataUrl}" alt="thumbnail">`;
+                    filmstripInfo.textContent =
+                        `${state.workingWidth}×${state.workingHeight} | ${state.image?.name || 'Edited image'}`;
+                }
+            }
+
+            // ==================== IMAGE LOADING ====================
+            function loadImage(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        state.image = img;
+                        state.image.name = file.name;
+                        // Determine working resolution (max 1600px on longest side for performance)
+                        const maxDim = 1600;
+                        let w = img.naturalWidth;
+                        let h = img.naturalHeight;
+                        if (Math.max(w, h) > maxDim) {
+                            const scale = maxDim / Math.max(w, h);
+                            w = Math.round(w * scale);
+                            h = Math.round(h * scale);
+                        }
+                        state.workingWidth = w;
+                        state.workingHeight = h;
+                        // Draw to offscreen canvas to get original ImageData
+                        const offscreen = document.createElement('canvas');
+                        offscreen.width = w;
+                        offscreen.height = h;
+                        const offCtx = offscreen.getContext('2d');
+                        offCtx.drawImage(img, 0, 0, w, h);
+                        state.originalImageData = offCtx.getImageData(0, 0, w, h);
+                        state.displayImageData = new ImageData(
+                            new Uint8ClampedArray(state.originalImageData.data),
+                            w, h
+                        );
+                        // Reset adjustments
+                        Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+                        state.activePreset = null;
+                        syncSlidersToState();
+                        updatePresetCardsHighlight();
+                        // Display
+                        mainCanvas.width = w;
+                        mainCanvas.height = h;
+                        ctx.putImageData(state.displayImageData, 0, 0);
+                        dropZone.classList.add('hidden');
+                        histogramContainer.style.display = 'block';
+                        updateHistogram(state.displayImageData);
+                        updateFilmstripThumb();
+                        filmstripInfo.textContent = `${w}×${h} | ${file.name}`;
+                        // Fit canvas in view
+                        fitCanvasToView();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function fitCanvasToView() {
+                if (!state.image) return;
+                const area = document.getElementById('canvasArea');
+                const maxW = area.clientWidth * 0.9;
+                const maxH = area.clientHeight * 0.85;
+                const scale = Math.min(1, maxW / state.workingWidth, maxH / state.workingHeight);
+                mainCanvas.style.width = (state.workingWidth * scale) + 'px';
+                mainCanvas.style.height = (state.workingHeight * scale) + 'px';
+            }
+
+            // ==================== EVENT HANDLERS ====================
+            document.getElementById('btnImport').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) loadImage(e.target.files[0]);
+                fileInput.value = '';
+            });
+
+            document.getElementById('btnExport').addEventListener('click', () => {
+                if (!state.displayImageData) return;
+                // Re-render at full quality for export
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = state.workingWidth;
+                exportCanvas.height = state.workingHeight;
+                const exportCtx = exportCanvas.getContext('2d');
+                const processed = state.showBefore ?
+                    new ImageData(new Uint8ClampedArray(state.originalImageData.data), state.workingWidth, state
+                        .workingHeight) :
+                    applyAdjustments(state.originalImageData, state.adjustments);
+                exportCtx.putImageData(processed, 0, 0);
+                const link = document.createElement('a');
+                link.download = 'edited_photo.jpg';
+                link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+            });
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                Object.keys(state.adjustments).forEach(key => { state.adjustments[key] = 0; });
+                state.activePreset = null;
+                state.showBefore = false;
+                document.getElementById('btnBeforeAfter').classList.remove('active-toggle');
+                syncSlidersToState();
+                updatePresetCardsHighlight();
+                render();
+            });
+
+            const btnBeforeAfter = document.getElementById('btnBeforeAfter');
+            btnBeforeAfter.addEventListener('click', () => {
+                state.showBefore = !state.showBefore;
+                btnBeforeAfter.classList.toggle('active-toggle', state.showBefore);
+                render();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '\\' || e.key === 'Backslash') {
+                    e.preventDefault();
+                    if (!state.showBefore) {
+                        state.showBefore = true;
+                        btnBeforeAfter.classList.add('active-toggle');
+                        render();
+                    }
+                }
+                if (e.key === 'r' && e.ctrlKey) {
+                    e.preventDefault();
+                    document.getElementById('btnReset').click();
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.key === '\\' || e.key === 'Backslash') {
+                    e.preventDefault();
+                    state.showBefore = false;
+                    btnBeforeAfter.classList.remove('active-toggle');
+                    render();
+                }
+            });
+
+            // Drag and drop
+            const canvasArea = document.getElementById('canvasArea');
+            canvasArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                canvasArea.style.background = '#1a1a1a';
+            });
+            canvasArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                canvasArea.style.background = '#111';
+            });
+            canvasArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                canvasArea.style.background = '#111';
+                const file = e.dataTransfer.files[0];
+                if (file) loadImage(file);
+            });
+
+            // Tool panel switching
+            const toolIcons = document.querySelectorAll('.tool-icon');
+            const panels = {
+                light: document.getElementById('panelLight'),
+                color: document.getElementById('panelColor'),
+                effects: document.getElementById('panelEffects'),
+                presets: document.getElementById('panelPresets'),
+            };
+
+            toolIcons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const tool = icon.dataset.tool;
+                    state.selectedTool = tool;
+                    toolIcons.forEach(i => i.classList.remove('active'));
+                    icon.classList.add('active');
+                    Object.values(panels).forEach(p => p.classList.add('hidden'));
+                    if (panels[tool]) panels[tool].classList.remove('hidden');
+                });
+            });
+
+            // Filmstrip thumb click
+            filmstripThumb.addEventListener('click', () => {
+                if (state.image) {
+                    state.showBefore = false;
+                    btnBeforeAfter.classList.remove('active-toggle');
+                    render();
+                }
+            });
+
+            // Window resize
+            window.addEventListener('resize', fitCanvasToView);
+
+            // ==================== INITIAL STATE ====================
+            syncSlidersToState();
+            histogramContainer.style.display = 'none';
+            console.log('🖼️ Lightroom Online ready!');
+            console.log('  - Drag & drop an image to start editing');
+            console.log('  - Use left panel tools to adjust');
+            console.log('  - Press \\ key to toggle before/after');
+            console.log('  - Click Export to download your edited photo');
+            console.log('  - Try the Presets for instant looks!');
+        })();
+    </script>
+</body>
+</html>
